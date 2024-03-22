@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "275187840763",
+    "firebase_url": "https://progresi-mobile.firebaseio.com",
+    "project_id": "progresi-mobile",
+    "storage_bucket": "progresi-mobile.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:275187840763:android:9c4712a5e87a04217de25e",
+        "android_client_info": {
+          "package_name": "com.kdi.progresi"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "275187840763-4fm5e5gbgk31cqg1g7k12st72jooi4jb.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAYsTgceuFBoJ0hN9vAsli8Nw4bx3Ybrao"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "275187840763-4fm5e5gbgk31cqg1g7k12st72jooi4jb.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

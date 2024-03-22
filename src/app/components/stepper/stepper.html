@@ -1,0 +1,29 @@
+<div class="stepper">
+  <ul class="nav nav-tabs" role="tablist">
+    <li
+      *ngFor="let item of props.items;"
+      role="presentation"
+      class="{{item.isActive == true ? 'active' : 'disabled'}}"
+    >
+      <a
+        class="persistant-disabled"
+        ion-button
+        (click)="navigate(item.url,item.id)"
+        data-toggle="tab"
+        aria-controls="stepper-step-{{item.id}}"
+        role="tab"
+        title="{{item.title}}"
+      >
+        <span class="round-tab">{{item.id}}</span>
+      </a>
+      <p class="caption">{{item.title}}</p>
+    </li>
+  </ul>
+</div>
+<ion-item color="secondary" class="w-100 pt-3">
+  <ion-icon style="margin-right: 8px" name="document-text-outline"></ion-icon>
+  <label class="font-size-16">{{props.titleActive}}</label>
+  <label slot="end" class="text-right font-size-14"
+    >Step {{props.idActive}}</label
+  >
+</ion-item>

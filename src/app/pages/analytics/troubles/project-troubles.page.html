@@ -1,0 +1,192 @@
+<HeaderGlobal [props]="props" (event)="eventHandler($event)"></HeaderGlobal>
+<Tabs *ngIf="props.tabs.enable" [props]="props.tabs" (event)="eventHandler($event)"></Tabs>
+
+<ion-content>
+  <ion-refresher slot="fixed" (ionRefresh)="ionRefresh($event)" (ionPull)="app.ionPull($event)"
+    (ionStart)="app.ionStart($event)">
+    <ion-refresher-content pullingIcon="arrow-dropdown" pullingText="Pull to refresh" refreshingSpinner="circles"
+      refreshingText="Refreshing...">
+    </ion-refresher-content>
+  </ion-refresher>
+  <div class="center-item">
+    <ion-spinner
+      [hidden]="isDataEmpty || (data_paging[props.tabs.current] && data_paging[props.tabs.current].length > 0)"
+      name="dots"></ion-spinner>
+    <div *ngIf="isDataEmpty && (data_paging[props.tabs.current] && data_paging[props.tabs.current].length < 1)">-- NO
+      DATA --</div>
+  </div>
+  <ion-card *ngFor="let item of data_paging[props.tabs.current]" class="global-text-regular"
+    (click)="expandData(item.id)">
+    <ion-card-header class="bg-light" style="padding:0;">
+      <div class="flex flex-row text-white">
+        <div class="flex flex-col bg-dark" style="width: 20%; padding:0.25rem">
+          <div *ngIf="props.tabs.current === 'field'" class="flex flex-col self-center">
+            <ion-icon class="self-center" [name]="!item.closed_date ? 'warning' : 'checkmark'" style="zoom:1.5"
+              [color]="!item.closed_date ? 'danger' : 'success'"></ion-icon>
+            <span class="self-center">{{ !item.closed_date ? 'Open' : 'Closed' }}</span>
+            <span *ngIf="item.is_overdue && !item.closed_date" class="self-center" style="color:red">Urgent</span>
+          </div>
+          <div *ngIf="props.tabs.current === 'safety'" class="flex flex-col self-center">
+            <ion-icon class="self-center" [name]="!item.closed_date_r ? 'warning' : 'checkmark'" style="zoom:1.5"
+              [color]="!item.closed_date_r ? 'danger' : 'success'"></ion-icon>
+            <span class="self-center">{{ !item.closed_date_r ? 'Open' : 'Closed' }}</span>
+            <span *ngIf="item.is_overdue && !item.closed_date_r" class="self-center" style="color:red">Urgent</span>
+          </div>
+        </div>
+        <div class="flex flex-col self-center text1 text-black" style="width: 75%; padding:0.5rem">
+          <strong class="ion-text-wrap" style="margin-bottom: 5px;">{{props.tabs.current === 'field' ? item.trouble :
+            item.hazard }}</strong>
+          <span class="global-text-little-detail">{{item.issue_date | date:'dd MMM yyyy'}}</span>
+        </div>
+        <div class="self-center text-black" style="padding-right: 0.5rem;">
+          <ion-icon [name]="item.expanded ? 'chevron-up-outline' : 'chevron-down-outline'"></ion-icon>
+        </div>
+      </div>
+    </ion-card-header>
+    <div>
+      <Accordion expandHeight="500px" [expanded]="item.expanded" *ngIf="props.tabs.current === 'field'">
+        <div class="flex flex-col w-full" style="padding:0.5rem 0 0.5rem 0;">
+          <ion-item class="text085">
+            <div class="flex flex-row w-full justify-between">
+              <div class="w-quarter text-grey">Task</div>
+              <div class="text-right self-center">{{item.task_name ? item.task_name : '-'}}</div>
+            </div>
+          </ion-item>
+          <ion-item class="text085">
+            <div class="flex flex-row w-full justify-between">
+              <div class="w-quarter text-grey">Penyebab</div>
+              <div class="text-right self-center">{{item.causes}}</div>
+            </div>
+          </ion-item>
+          <ion-item class="text085">
+            <div class="flex flex-row w-full justify-between">
+              <div class="w-quarter text-grey">Solusi</div>
+              <div class="text-right self-center">{{item.solution}}</div>
+            </div>
+          </ion-item>
+          <ion-item class="text085">
+            <div class="flex flex-row w-full justify-between">
+              <div class="w-quarter text-grey">PIC</div>
+              <div class="text-right self-center">{{item.pic}}</div>
+            </div>
+          </ion-item>
+          <ion-item class="text085">
+            <div class="flex flex-row w-full justify-between">
+              <div class="w-quarter text-grey">Deadline</div>
+              <div class="text-right self-center" [ngStyle]="item.is_overdue && !item.closed_date_r ? {'color':'red'} : ''">
+                {{!item.due_date ? '-' : item.due_date | date:'dd MMM yyyy'}}</div>
+            </div>
+          </ion-item>
+          <ion-item class="text085">
+            <div class="flex flex-row w-full justify-between">
+              <div class="w-quarter text-grey">Selesai</div>
+              <div class="text-right self-center"><strong [ngStyle]="item.is_late ? {'color':'red'} : ''">{{!item.closed_date_r ? '-' :
+                  item.closed_date_r | date:'dd MMM yyyy'}}</strong></div>
+            </div>
+          </ion-item>
+        </div>
+        <div class="flex flex-row" style="justify-content: flex-end; margin: 10px">
+          <div style="width: 25%;" *ngIf="app.auth.user.UserRoles[0].id !== 4 && !item.closed_date">
+            <ion-button icon-left size="medium" expand="block" color="dark"
+              (click)="closeTrouble(item.id, item.min_date, item.max_date); $event.stopPropagation()">
+              Close
+            </ion-button>
+          </div>
+          <div style="width: 25%;" *ngIf="app.auth.user.UserRoles[0].id !== 4">
+            <ion-button icon-left size="medium" expand="block" color="primary"
+              (click)="edit(item.id); $event.stopPropagation()">
+              <ion-icon name="create-outline"></ion-icon>
+            </ion-button>
+          </div>
+          <div style="width: 25%;" *ngIf="item.attachments.length > 0">
+            <ion-button icon-left size="medium" expand="block" color="secondary"
+              (click)="presentAttachments(item.attachments); $event.stopPropagation()">
+              <ion-icon name="image-outline"></ion-icon>&nbsp;{{item.attachments.length}}
+            </ion-button>
+          </div>
+        </div>
+      </Accordion>
+      <Accordion expandHeight="500px" [expanded]="item.expanded" *ngIf="props.tabs.current === 'safety'">
+        <div class="flex flex-col w-full" style="padding:0.5rem 0 0.5rem 0;">
+          <ion-item class="text085">
+            <div class="flex flex-row w-full justify-between">
+              <div class="w-quarter text-grey">Kecelakaan</div>
+              <div class="text-right self-center">{{item.type_of_incident ? item.type_of_incident : '-'}}</div>
+            </div>
+          </ion-item>
+          <ion-item class="text085">
+            <div class="flex flex-row w-full justify-between">
+              <div class="w-quarter text-grey">Eliminasi</div>
+              <div class="text-right self-center">{{item.pre_i}}</div>
+            </div>
+          </ion-item>
+          <ion-item class="text085">
+            <div class="flex flex-row w-full justify-between">
+              <div class="w-quarter text-grey">Substitusi</div>
+              <div class="text-right self-center">{{item.pre_ii}}</div>
+            </div>
+          </ion-item>
+          <ion-item class="text085">
+            <div class="flex flex-row w-full justify-between">
+              <div class="w-quarter text-grey" style="word-wrap: initial;">Kontrol Engineering</div>
+              <div class="text-right self-center">{{item.pre_iii}}</div>
+            </div>
+          </ion-item>
+          <ion-item class="text085">
+            <div class="flex flex-row w-full justify-between">
+              <div class="w-quarter text-grey">Admin</div>
+              <div class="text-right self-center">{{item.pre_iv}}</div>
+            </div>
+          </ion-item>
+          <ion-item class="text085">
+            <div class="flex flex-row w-full justify-between">
+              <div class="w-quarter text-grey">PPE</div>
+              <div class="text-right self-center">{{item.pre_v}}</div>
+            </div>
+          </ion-item>
+          <ion-item class="text085">
+            <div class="flex flex-row w-full justify-between">
+              <div class="w-quarter text-grey">Deadline</div>
+              <div class="text-right self-center" [ngStyle]="item.is_overdue && !item.closed_date_r ? {'color':'red'} : ''">
+                {{!item.due_date ? '-' : item.due_date | date:'dd MMM yyyy'}}
+              </div>
+            </div>
+          </ion-item>
+          <ion-item class="text085">
+            <div class="flex flex-row w-full justify-between">
+              <div class="w-quarter text-grey" style="word-wrap: initial;">Diselesaikan</div>
+              <div class="text-right self-center">
+                <strong [ngStyle]="item.is_late ? {'color':'red'} : ''">{{!item.closed_date_r ? '-' : item.closed_date_r |
+                date:'dd MMM yyyy'}}</strong>
+              </div>
+            </div>
+          </ion-item>
+        </div>
+        <div class="flex flex-row" style="justify-content: flex-end; margin: 10px">
+          <div style="width: 25%;" *ngIf="app.auth.user.UserRoles[0].id !== 4 && !item.closed_date_r">
+            <ion-button icon-left size="medium" expand="block" color="dark"
+              (click)="closeTrouble(item.id, item.min_date, item.max_date); $event.stopPropagation()">
+              Close
+            </ion-button>
+          </div>
+          <div style="width: 25%;" *ngIf="app.auth.user.UserRoles[0].id !== 4">
+            <ion-button icon-left size="medium" expand="block" color="secondary"
+              (click)="edit(item.id); $event.stopPropagation()">
+              <ion-icon name="create-outline"></ion-icon>
+            </ion-button>
+          </div>
+          <div style="width: 25%;" *ngIf="item.attachments.length > 0">
+            <ion-button icon-left size="medium" expand="block" color="secondary"
+              (click)="presentAttachments(item.attachments); $event.stopPropagation()">
+              <ion-icon name="image-outline"></ion-icon>&nbsp;{{item.attachments.length}}
+            </ion-button>
+          </div>
+        </div>
+      </Accordion>
+    </div>
+  </ion-card>
+  <ion-infinite-scroll threshold="100px" (ionInfinite)="loadData($event)">
+    <ion-infinite-scroll-content loadingSpinner="bubbles" loadingText="Loading more data...">
+    </ion-infinite-scroll-content>
+  </ion-infinite-scroll>
+</ion-content>

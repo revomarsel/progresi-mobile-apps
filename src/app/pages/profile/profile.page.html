@@ -1,0 +1,269 @@
+
+<HeaderGlobal [props]="props" (event)="eventHandler($event)"></HeaderGlobal>
+
+<ion-content>
+  <ion-card
+    style="border: none; border-radius: 55px 0 0 55px!important; margin-left: 0.5rem"
+  >
+  <div (click)="goToEditProfile()" style="padding: 3px 0px 3px 3px;    background-color: #ffbd5b;">
+    <div class="bg-primary d-flex" style="padding: 15px 25px;gap: 20px;text-transform: capitalize;border-top-left-radius: 50px;border-bottom-left-radius: 50px;">
+      <div>
+        <img
+          [src]="profilePic && profilePic!='null' ? profilePic : '/assets/img/avatar.png'"
+        />
+      </div>
+      <div>
+        <h1 class="global-text-title text-white m-0" style="padding: 0">
+          {{ userData && userData.username }}
+        </h1>
+        <h2
+          class="global-text-little-detail m-0 "
+          style="color: var(--ion-color-tertiary);margin-top: 5px;"
+        >
+          {{ userData && userData.position }}
+        </h2>
+      </div>
+    </div>
+  </div>
+  </ion-card>
+  <ion-card style="margin: 0.5rem">
+    <ion-card-content>
+      <ion-item class="global-text-title" style="padding-top: 0px;margin-left: -15px;"
+        >Company Profile</ion-item
+      >
+      <div class="d-flex" style="padding: 15px 5px 5px 5px;gap: 10px;">
+        <div>
+          <div *ngIf="userData && (!userData.logo || userData.logo === null)" class="logo m-0" style="    margin-right: 5px;width: 100px;text-align: center;height: 100px;"></div>
+          <ion-thumbnail *ngIf="userData && (userData.logo || userData.logo !== null)" slot="start" style="margin-right: 5px;width: 100%;text-align: center;height: 100%;margin: 0px">
+            <img style="width: 100%;height: 100%;border-radius: unset;object-fit: contain;" [src]="userData.logo ? getRepoImage(userData.logo) :
+            '/assets/img/img-empty.png'
+        "></ion-thumbnail>
+        </div>
+        <div>
+          <b class="mb-2 d-block">{{ userData && userData.nama_perusahaan}}</b>
+          <p class="m-0">{{userData && userData.alamat}}</p>
+        </div>
+      </div>
+      <div *ngIf="remSub" style="border-bottom: 1px solid #d1d1d1;
+      padding-bottom: 10px;
+      margin-bottom: 5px;
+      border-top: 1px solid #d1d1d1;
+      padding-top: 10px;
+      margin-top: 10px;">
+        <ion-grid>
+          <ion-row class="global-text-little-detail">
+            <ion-col size="5" class="dead-center">Aktif Hingga</ion-col>
+            <ion-col size="7" class="dead-center">Durasi</ion-col>
+          </ion-row>
+          <ion-row class="global-text-regular">
+            <ion-col size="5" class="dead-center"
+              >{{remSub && remSub.date}}</ion-col
+            >
+            <ion-col size="7" class="dead-center"
+              >{{remSub && remSub.datediff}}</ion-col
+            >
+          </ion-row>
+        </ion-grid>
+      </div>
+      <div
+      *ngIf="remSub"
+        class="global-text-regular"
+        (click)="openURL('https://progresi.co.id/pricing')"
+      >
+        <ion-grid>
+          <ion-row>
+            <ion-col size="1" class="dead-center">
+              <ion-icon name="card-sharp" size="medium"></ion-icon>
+            </ion-col>
+            <ion-col size="10">Update Langganan</ion-col>
+            <ion-col size="1" class="dead-center">
+              <ion-icon name="chevron-forward-outline" size="medium"></ion-icon>
+            </ion-col>
+          </ion-row>
+        </ion-grid>
+      </div>
+    </ion-card-content>
+  </ion-card>
+  <ion-card style="margin: 0.5rem">
+    <ion-card-content>
+      <ion-item class="global-text-title" style="padding-top: 0px"
+        >About</ion-item
+      >
+      <ion-item class="global-text-regular" (click)="openURL(urls.support)">
+        <ion-grid>
+          <ion-row>
+            <ion-col size="1" class="dead-center">
+              <ion-icon name="help-outline" size="medium"></ion-icon>
+            </ion-col>
+            <ion-col size="10">Bantuan</ion-col>
+            <ion-col size="1" class="dead-center">
+              <ion-icon name="chevron-forward-outline" size="medium"></ion-icon>
+            </ion-col>
+          </ion-row>
+        </ion-grid>
+      </ion-item>
+      <ion-item
+        class="global-text-regular"
+        (click)="openURL('https://progresi.co.id/')"
+      >
+        <ion-grid>
+          <ion-row>
+            <ion-col size="1" class="dead-center">
+              <ion-icon name="information-outline" size="medium"></ion-icon>
+            </ion-col>
+            <ion-col size="10">Tentang Kami</ion-col>
+            <ion-col size="1" class="dead-center">
+              <ion-icon name="chevron-forward-outline" size="medium"></ion-icon>
+            </ion-col>
+          </ion-row>
+        </ion-grid>
+      </ion-item>
+      <ion-item
+        class="global-text-regular"
+        (click)="openURL('https://www.youtube.com/channel/UCfT7uxdhIVTFr4up73VyuJw/playlists')"
+      >
+        <ion-grid>
+          <ion-row>
+            <ion-col size="1" class="dead-center">
+              <ion-icon name="videocam-outline" size="medium"></ion-icon>
+            </ion-col>
+            <ion-col size="10">Tutorial Video</ion-col>
+            <ion-col size="1" class="dead-center">
+              <ion-icon name="chevron-forward-outline" size="medium"></ion-icon>
+            </ion-col>
+          </ion-row>
+        </ion-grid>
+      </ion-item>
+    </ion-card-content>
+  </ion-card>
+  <ion-card style="margin: 0.5rem">
+    <ion-card-content>
+      <ion-item class="global-text-title" style="padding-top: 0px"
+        >Account</ion-item
+      >
+      <ion-item class="global-text-regular" (click)="changePass()">
+        <ion-grid>
+          <ion-row>
+            <ion-col size="1" class="dead-center">
+              <ion-icon name="key-outline" size="medium"></ion-icon>
+            </ion-col>
+            <ion-col size="10">Change Password</ion-col>
+            <ion-col size="1" class="dead-center">
+              <ion-icon name="chevron-forward-outline" size="medium"></ion-icon>
+            </ion-col>
+          </ion-row>
+        </ion-grid>
+      </ion-item>
+      <ion-item class="global-text-regular" (click)="logout()">
+        <ion-grid>
+          <ion-row>
+            <ion-col size="1" class="dead-center">
+              <ion-icon name="exit-outline" size="medium"></ion-icon>
+            </ion-col>
+            <ion-col size="10">Logout</ion-col>
+            <ion-col size="1" class="dead-center">
+              <ion-icon name="chevron-forward-outline" size="medium"></ion-icon>
+            </ion-col>
+          </ion-row>
+        </ion-grid>
+      </ion-item>
+    </ion-card-content>
+  </ion-card>
+</ion-content>
+<!-- <ion-content class="profile">
+  <ion-card no-margin>
+    <ion-card-content class="bg-profile">
+      <img src="assets/img/avatar.png">
+      <h1 class="fw500">João Firmino</h1>
+      <h2 color="light" margin-bottom>Customer</h2>
+      <ion-button icon-left color="secondary">
+        <ion-icon name="photos"></ion-icon> 
+        Edit / Add Avatar
+      </ion-button>
+      <ion-button icon-left color="secondary" (click)="app.logout()">
+        <ion-icon name="photos"></ion-icon> 
+        Logout
+      </ion-button>
+    </ion-card-content>
+  
+    <ion-grid fixed no-padding>
+      <ion-row>
+        <ion-col size="12" padding>
+
+          <ion-list margin-bottom>
+            <ion-list-header color="light">
+              <ion-label class="fw700">Form</ion-label>
+            </ion-list-header>
+
+            <ion-item>
+              <ion-label color="dark" position="stacked">Full Name:</ion-label>
+              <ion-input inputmode="text" placeholder="Ex..: Joe Doe" value="João Firmino"></ion-input>
+            </ion-item>
+    
+            <ion-item>
+              <ion-label color="dark" position="stacked">Email:</ion-label>
+              <ion-input inputmode="email" placeholder="Ex.: joe@doe.com" value="firminoata@gmail.com"></ion-input>
+            </ion-item>
+    
+            <ion-item>
+              <ion-label color="dark" position="stacked">Address:</ion-label>
+              <ion-input inputmode="text" placeholder="Ex.: Abey Road 5"></ion-input>
+            </ion-item>
+    
+            <ion-item>
+              <ion-label color="dark">City</ion-label>
+              <ion-select>
+                <ion-select-option value="nes">New York</ion-select-option>
+                <ion-select-option value="n64">Los Angeles</ion-select-option>
+                <ion-select-option value="ps">London</ion-select-option>
+                <ion-select-option value="genesis">Paris</ion-select-option>
+                <ion-select-option value="saturn">São Paulo</ion-select-option>
+                <ion-select-option value="snes">Tokyo</ion-select-option>
+                <ion-select-option value="snes">New Delhi</ion-select-option>
+              </ion-select>
+            </ion-item>
+    
+            <ion-item>
+              <ion-label color="dark">State</ion-label>
+              <ion-select>
+                <ion-select-option value="nes">NY</ion-select-option>
+                <ion-select-option value="n64">CA</ion-select-option>
+                <ion-select-option value="ps">Greater London</ion-select-option>
+                <ion-select-option value="genesis">Paris</ion-select-option>
+                <ion-select-option value="saturn">SP</ion-select-option>
+                <ion-select-option value="snes">Kantō</ion-select-option>
+                <ion-select-option value="snes">Delhi</ion-select-option>
+              </ion-select>
+            </ion-item>
+          </ion-list>
+
+          <ion-list>
+            <ion-radio-group>
+              <ion-list-header color="light">
+                <ion-label class="fw700">User Type</ion-label>
+              </ion-list-header>
+          
+              <ion-item>
+                <ion-label color="primary">Customer</ion-label>
+                <ion-radio slot="start" value="customer" checked></ion-radio>
+              </ion-item>
+          
+              <ion-item>
+                <ion-label color="primary">Owner</ion-label>
+                <ion-radio slot="start" value="agent"></ion-radio>
+              </ion-item>
+            </ion-radio-group>
+
+            <ion-item>
+              <ion-label class="text-1x">Checkbox test</ion-label>
+              <ion-checkbox></ion-checkbox>
+            </ion-item>
+          </ion-list>
+  
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+  
+    <ion-button size="large" expand="full" color="dark" (click)="sendData()" no-margin>Edit</ion-button>
+  </ion-card>
+</ion-content> -->

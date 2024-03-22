@@ -1,0 +1,548 @@
+<HeaderGlobal [props]="props" (event)="eventHandler($event)"></HeaderGlobal>
+<Tabs *ngIf="props.tabs.enable" [props]="props.tabs" (event)="eventHandler($event)"></Tabs>
+<ion-toolbar *ngIf="props.search.enable" color="dark">
+  <ion-searchbar slot="start" [(ngModel)]="searchKey" (ionChange)="searchValue()" (ionClear)="cancelSearch()"
+    showCancelButton="focus" animated></ion-searchbar>
+</ion-toolbar>
+
+<ion-content padding>
+  <ion-refresher slot="fixed" (ionRefresh)="ionRefresh($event)" (ionPull)="app.ionPull($event)"
+    (ionStart)="app.ionStart($event)">
+    <ion-refresher-content pullingIcon="arrow-dropdown" pullingText="Pull to refresh" refreshingSpinner="circles"
+      refreshingText="Refreshing...">
+    </ion-refresher-content>
+  </ion-refresher>
+  <ng-container *ngIf="props.tabs.current === 'tasks'">
+    <ion-grid>
+      <ion-card (click)="navigateAdd()" [hidden]="isViewOnly" style="margin-top: 5px;background-color: #1173cee3;">
+        <ion-card-content style="padding:0.75rem;">
+          <div class="flex flex-row" style="align-items:center;gap: 10px;">
+            <ion-icon style="color:white" class="expander" name="add-outline" size="medium"></ion-icon>
+           <div *ngIf="!tasks || tasks.length < 1" class="flex flex-col">
+            <b  style="color:white" class="global-text-little-detail">Laporan Masih Kosong !</b>
+              <span style="color:white" class="global-text-little-detail">*Click Untuk Tambah Laporan</span>
+           </div>
+           <span *ngIf="!tasks || tasks.length > 1"  style="color:white" class="global-text-little-detail">Tambahkan Laporan </span>
+          </div>
+        </ion-card-content>
+      </ion-card>
+      <div *ngIf="isViewOnly && (!tasks ||tasks.length < 1)" class="empty">-- no data --</div>
+    </ion-grid>
+    <ion-grid *ngFor="let item of tasks" style="padding-top: 0px;padding-bottom: 5px">
+      <ion-card class="card-spacer" (click)="expandData('tasks', item.id)">
+        <ion-card-content class="global-text-regular">
+          <ion-grid>
+            <ion-row>
+              <div class="flex flex-row justify-between" style="width: 100%;">
+                <div class="flex flex-col"
+                  [ngStyle]="app.auth.user.UserRoles[0].id === 2 || app.auth.user.UserRoles[0].id === 3 || app.auth.user.UserRoles[0].id === 7 ? {'margin-right':'0.25rem'} : ''">
+                  <strong *ngIf="item.parent_task">{{item.name}}</strong>
+                  <div *ngIf="item.parent_task" class="global-text-desc" style="margin-top:0.5rem">{{item.parent_task}}</div>
+                  <strong *ngIf="!item.parent_task" style="margin-top:0.5rem">{{item.name}}</strong>
+                </div>
+                <span
+                  *ngIf="app.auth.user.UserRoles[0].id === 2 || app.auth.user.UserRoles[0].id === 3 || app.auth.user.UserRoles[0].id === 7"
+                  class="edit-indicator" (click)="navigateToInputItem($event, 'tasks', item.id)">
+                  Edit
+                </span>
+              </div>
+              <ion-col size=12 class="dead-center">
+                <ion-icon class="expander" [name]="item.expanded ? 'chevron-up-outline' : 'chevron-down-outline'">
+                </ion-icon>
+              </ion-col>
+            </ion-row>
+            <Accordion expandHeight="400px" [expanded]="item.expanded">
+              <ion-row style="margin-bottom: -5px">
+                <ion-col size=1 align-self-center>
+                  <span>
+                    <ion-icon name="timer" zoom="1.5"></ion-icon>
+                  </span>
+                </ion-col>
+                <ion-col size=11 align-self-center>
+                  <span style="font-size: 13px;">{{item.start_date | date:'dd MMM yyyy'}} s.d. {{item.end_date | date:'dd MMM yyyy'}}</span>
+                </ion-col>
+                <ion-col size=1 align-self-center>
+                  <span>
+                    <ion-icon name="people" zoom="1.5"></ion-icon>
+                  </span>
+                </ion-col>
+                <ion-col size=11 align-self-center>
+                  <span style="font-size: 13px;">{{item.worker_2 ? item.worker_2 : 0 }} Tukang & {{item.worker_3 ? item.worker_3 : 0}} Pembantu</span>
+                </ion-col>
+              </ion-row>
+              <ion-row>
+                <ion-col size=6>
+                  <ion-row>
+                    <ion-col size=11 style="text-align:center;padding-bottom: 0px;"><b>{{item.completion}} {{item.unit}}</b> / <b>{{( ( item.completion/(item.qty/item.duration) )*100 ).toFixed(2)}}%</b></ion-col>
+                  </ion-row>
+                  <ion-row>
+                    <ion-col size=11 class="border-bottom-list">Capaian hari ini</ion-col>
+                  </ion-row>
+                </ion-col>
+                <ion-col size=6>
+                  <ion-row>
+                    <ion-col size=11 style="text-align:center;padding-bottom: 0px;"><b>{{item.total_completion}} {{item.unit}}</b> / <b>{{((item.total_completion/item.qty)*100).toFixed(2)}}%</b></ion-col>
+                  </ion-row>
+                  <ion-row>
+                    <ion-col size=11 class="border-bottom-list">Kumulatif</ion-col>
+                  </ion-row>
+                </ion-col>
+                <ion-col size=6 style="margin-top: -7px;">
+                  <ion-row>
+                    <ion-col size=11 style="text-align:center;padding-bottom: 0px;">
+                      <b>{{item.qty && item.duration ? ( (item.qty / item.duration).toFixed(2) ) : 0}}
+                        {{item.unit}} / {{item.qty && item.duration ? ( ( item.qty / (item.qty / item.duration)).toFixed(2) * 100) : 0}} %</b>
+                    </ion-col>
+                  </ion-row>
+                  <ion-row>
+                    <ion-col size=11 style="text-align:center;font-size:11px;color:grey;">Target hari ini</ion-col>
+                  </ion-row>
+                </ion-col>
+                <ion-col size=6 style="margin-top: -7px;">
+                  <ion-row>
+                    <ion-col size=11 style="text-align:center;padding-bottom: 0px;"><b>{{item.qty}} {{item.unit}} / 100%</b></ion-col>
+                  </ion-row>
+                  <ion-row>
+                    <ion-col size=11 style="text-align:center;font-size:11px;color:grey;">Target total</ion-col>
+                  </ion-row>
+                </ion-col>
+              </ion-row>
+            </Accordion>
+          </ion-grid>
+        </ion-card-content>
+      </ion-card>
+    </ion-grid>
+  </ng-container>
+  <ng-container *ngIf="props.tabs.current === 'material_deliveries'">
+    <ion-grid>
+      <ion-card (click)="navigateAdd()" [hidden]="isViewOnly">
+        <ion-card-content style="padding:0.75rem;">
+          <div class="flex flex-col" style="align-items:center">
+            <ion-icon class="expander" name="add-outline" size="large"></ion-icon>
+            <span class="global-text-little-detail">
+              {{
+              !material_deliveries || material_deliveries.length < 1 ? 'empty data, add data now' : 'add data' }}
+                </span>
+          </div>
+        </ion-card-content>
+      </ion-card>
+      <div *ngIf="isViewOnly && (!material_deliveries ||material_deliveries.length < 1)" class="empty">-- no data --
+      </div>
+    </ion-grid>
+    <ion-grid *ngFor="let item of material_deliveries" class="custom-row">
+      <ion-card>
+        <ion-card-content class="global-text-regular">
+          <div class="flex flex-row justify-between">
+            <div>
+              <b>{{item.name}}</b>
+              <div class="global-text-little-detail" style="margin: 0.25rem 0 0.5rem 0">{{item.supplier}}</div>
+            </div>
+            <div
+              *ngIf="app.auth.user.UserRoles[0].id === 2 || app.auth.user.UserRoles[0].id === 3 || app.auth.user.UserRoles[0].id === 7"
+              class="edit-indicator self-center" (click)="navigateToInputItem($event, 'material_deliveries', item.id)">
+              Edit</div>
+          </div>
+          <div class="flex flex-row" style="margin:0.25rem 0 0.25rem 0">
+            <div class="flex flex-col" style="width:85%">
+              <div class="global-text-desc" style="font-size: 0.85rem;">
+                <b *ngIf="item.parent_task">{{item.parent_task}}</b>
+                <div *ngIf="item.parent_task" style="margin-top:0.15rem">{{item.task_name}}</div>
+                <b *ngIf="!item.parent_task" style="margin-top:0.15rem">{{item.task_name}}</b>
+              </div>
+            </div>
+            <div class="center-self" style="width:30%">
+              <div class="flex flex-col">
+                <div class="flex flex-row" style="align-self:flex-end">
+                  <strong>{{item.qty}}</strong> &nbsp;<span class="global-text-little-detail">{{item.unit}}</span>
+                </div>
+                <span class="global-text-desc" style="text-align: right;">
+                  {{item.price | currency:"Rp.":true:"1.0"}}
+                </span>
+              </div>
+            </div>
+          </div>
+        </ion-card-content>
+      </ion-card>
+    </ion-grid>
+  </ng-container>
+  <ng-container *ngIf="props.tabs.current === 'materials_used'">
+    <ion-grid>
+      <ion-card (click)="navigateAdd()" [hidden]="isViewOnly">
+        <ion-card-content style="padding:0.75rem;">
+          <div class="flex flex-col" style="align-items:center">
+            <ion-icon class="expander" name="add-outline" size="large"></ion-icon>
+            <span class="global-text-little-detail">
+              {{
+              !materials_used || materials_used.length < 1 ? 'empty data, add data now' : 'add data' }} </span>
+          </div>
+        </ion-card-content>
+      </ion-card>
+      <div *ngIf="isViewOnly && (!materials_used ||materials_used.length < 1)" class="empty">-- no data --</div>
+    </ion-grid>
+    <ion-grid *ngFor="let item of materials_used" class='custom-row'>
+      <ion-card *ngIf="item.materials" (click)="expandData('materials_used', item.task_code, 'task_code')">
+        <ion-card-content class="global-text-regular">
+          <ion-row>
+            <div class="flex flex-row justify-between" style="width: 100%;">
+              <div class="flex flex-col"
+                [ngStyle]="app.auth.user.UserRoles[0].id === 2 || app.auth.user.UserRoles[0].id === 3 || app.auth.user.UserRoles[0].id === 7 && {'margin-right':'0.25rem'}">
+                <strong *ngIf="item.parent_task">{{item.parent_task}}</strong>
+                <div class="global-text-desc" *ngIf="item.parent_task" style="margin-top:0.5rem">{{item.task_name}}
+                </div>
+                <strong *ngIf="!item.parent_task" style="margin-top:0.5rem">{{item.task_name}}</strong>
+              </div>
+              <span
+                *ngIf="app.auth.user.UserRoles[0].id === 2 || app.auth.user.UserRoles[0].id === 3 || app.auth.user.UserRoles[0].id === 7"
+                class="edit-indicator" (click)="navigateToInputItem($event, 'materials_used', item.id)">Edit</span>
+            </div>
+            <ion-col size=12 class="dead-center">
+              <ion-icon class="expander" [name]="item.expanded ? 'chevron-up-outline' : 'chevron-down-outline'">
+              </ion-icon>
+            </ion-col>
+          </ion-row>
+          <Accordion expandHeight="800px" [expanded]="item.expanded">
+            <ion-row>
+              <ion-col size=4 style="text-align:center" class="small-header"><b>Material</b></ion-col>
+              <ion-col size=4 style="text-align:center" class="small-header"><b>Pengunaan</b></ion-col>
+              <ion-col size=4 style="text-align:center" class="small-header"><b>Max.</b></ion-col>
+              <ion-row *ngFor="let content of item.materials" style="width:100%" class="global-text-desc">
+                <ion-col size=4 style="text-align:center">{{content.material_name}}</ion-col>
+                <ion-col size=4 style="text-align:center">{{content.qty}} {{content.unit}}</ion-col>
+                <ion-col size=4 style="text-align:center">{{content.max_use}} {{content.unit}}</ion-col>
+              </ion-row>
+            </ion-row>
+          </Accordion>
+        </ion-card-content>
+      </ion-card>
+    </ion-grid>
+  </ng-container>
+  <ng-container *ngIf="props.tabs.current === 'eq_mob'">
+    <ion-grid>
+      <ion-card (click)="navigateAdd()" [hidden]="isViewOnly">
+        <ion-card-content style="padding:0.75rem;">
+          <div class="flex flex-col" style="align-items:center">
+            <ion-icon class="expander" name="add-outline" size="large"></ion-icon>
+            <span class="global-text-little-detail">
+              {{
+              !eq_mob || eq_mob.length < 1 ? 'empty data, add data now' : 'add data' }} </span>
+          </div>
+        </ion-card-content>
+      </ion-card>
+      <div *ngIf="isViewOnly && (!eq_mob ||eq_mob.length < 1)" class="empty">-- no data --</div>
+    </ion-grid>
+    <ion-grid *ngFor="let item of eq_mob" class="custom-row">
+      <ion-card>
+        <ion-card-content class="global-text-regular">
+          <div class="flex flex-row" style="padding: 0.5rem 0 0.5rem 0">
+            <div class="flex flex-col" style="width:70%">
+              <div>
+                <strong>{{item.name}}</strong>
+                <span class="global-text-little-detail">({{
+                  item.type == 1 ? 'Handy Tools' : item.type == 2 ? 'Heavy Equipment': item.type == 3 ?
+                  'Safety Tools' : item.type == 4 ? 'Power Tools' : ''
+                  }})
+                </span>
+              </div>
+              <span class="global-text-desc" style="margin: 0.25rem 0 0.5rem 0;">{{item.supplier}}</span>
+              <div class="global-text-desc" style="font-size: 0.85rem;">
+                <b *ngIf="item.parent_task">{{item.parent_task}}</b>
+                <div *ngIf="item.parent_task" style="margin-top:0.15rem">{{item.task_name}}</div>
+                <b *ngIf="!item.parent_task" style="margin-top:0.15rem">{{item.task_name}}</b>
+              </div>
+            </div>
+            <div class="center-self" style="width:30%">
+              <div class="flex flex-col">
+                <span
+                  *ngIf="app.auth.user.UserRoles[0].id === 2 || app.auth.user.UserRoles[0].id === 3 || app.auth.user.UserRoles[0].id === 7"
+                  class="edit-indicator" style="align-self: flex-end; margin-bottom: 0.5rem;"
+                  (click)="navigateToInputItem($event, 'eq_mob', item.id)">Edit</span>
+                <div class="flex flex-row" style="align-self:flex-end">
+                  <strong>{{item.qty}}</strong> &nbsp;<span class="global-text-little-detail">{{item.unit}}</span>
+                </div>
+                <span class="global-text-desc" style="text-align: right;">
+                  {{item.price | currency:"Rp.":true:"1.0"}}
+                </span>
+                <div class="flex flex-col" *ngIf="item.duration > 0">
+                  <div class="flex flex-row" style="align-self:flex-end; margin-top:0.5rem;">
+                    <strong>{{item.duration}}</strong> &nbsp;<span
+                      class="global-text-little-detail">{{item.unit_sewa}}</span>
+                  </div>
+                  <span class="global-text-little-detail" style="text-align: right;">
+                    Waktu sewa
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </ion-card-content>
+      </ion-card>
+    </ion-grid>
+  </ng-container>
+  <ng-container *ngIf="props.tabs.current === 'eq_demob'">
+    <ion-grid>
+      <ion-card (click)="navigateAdd()" [hidden]="isViewOnly">
+        <ion-card-content style="padding:0.75rem;">
+          <div class="flex flex-col" style="align-items:center">
+            <ion-icon class="expander" name="add-outline" size="large"></ion-icon>
+            <span class="global-text-little-detail">
+              {{
+              !eq_demob || eq_demob.length < 1 ? 'empty data, add data now' : 'add data' }} </span>
+          </div>
+        </ion-card-content>
+      </ion-card>
+      <div *ngIf="isViewOnly && (!eq_demob ||eq_demob.length < 1)" class="empty">-- no data --</div>
+    </ion-grid>
+    <ion-grid *ngFor="let item of eq_demob" class="custom-row">
+      <ion-card>
+        <ion-card-content class="global-text-regular">
+          <div class="flex flex-row" style="padding: 0.5rem 0 0.5rem 0">
+            <div class="flex flex-col" style="width:70%">
+              <div>
+                <strong>{{item.name}}</strong>&nbsp;
+                <span class="global-text-little-detail">({{
+                  item.type == 1 ? 'Handy Tools' : item.type == 2 ? 'Heavy Equipment': item.type == 3 ?
+                  'Safety Tools' : item.type == 4 ? 'Power Tools' : ''
+                  }})
+                </span>
+              </div>
+              <span class="global-text-desc" style="margin: 0.25rem 0 0.5rem 0;">{{item.supplier}}</span>
+              <div style="font-size: 0.85rem;">
+                <b *ngIf="item.parent_task">{{item.parent_task}}</b>
+                <div *ngIf="item.parent_task" style="margin-top:0.15rem">{{item.task_name}}</div>
+                <b *ngIf="!item.parent_task" style="margin-top:0.15rem">{{item.task_name}}</b>
+              </div>
+            </div>
+            <div class="center-self" style="width:30%">
+              <div class="flex flex-col">
+                <span
+                  *ngIf="app.auth.user.UserRoles[0].id === 2 || app.auth.user.UserRoles[0].id === 3 || app.auth.user.UserRoles[0].id === 7"
+                  class="edit-indicator" style="align-self: flex-end; margin-bottom: 0.5rem;"
+                  (click)="navigateToInputItem($event, 'eq_demob', item.id)">Edit</span>
+                <div class="flex flex-row" style="align-self:flex-end">
+                  <strong>{{item.qty}}</strong> &nbsp;<span class="global-text-little-detail">{{item.unit}}</span>
+                </div>
+                <span class="global-text-desc" style="text-align: right;">
+                  {{item.price | currency:"Rp.":true:"1.0"}}
+                </span>
+              </div>
+            </div>
+          </div>
+        </ion-card-content>
+      </ion-card>
+    </ion-grid>
+  </ng-container>
+  <ng-container *ngIf="props.tabs.current === 'worker'">
+    <ion-grid>
+      <ion-card (click)="navigateAdd()" [hidden]="isViewOnly">
+        <ion-card-content style="padding:0.75rem;">
+          <div class="flex flex-col" style="align-items:center">
+            <ion-icon class="expander" name="add-outline" size="large"></ion-icon>
+            <span class="global-text-little-detail">
+              {{
+              !worker || worker.length < 1 ? 'empty data, add data now' : 'add data' }} </span>
+          </div>
+        </ion-card-content>
+      </ion-card>
+      <div *ngIf="isViewOnly && (!worker ||worker.length < 1)" class="empty">-- no data --</div>
+    </ion-grid>
+    <ion-grid *ngFor="let item of worker" class="custom-row">
+      <ion-card (click)="navigateToInputItem($event, 'worker', item.worker_type_id)">
+        <ion-card-content class="global-text-regular">
+          <div class="flex flex-col">
+            <div class="flex flex-row justify-between">
+              <div class="global-text-regular">
+                <b>{{ item.name }}</b>
+              </div>
+              <div
+                *ngIf="app.auth.user.UserRoles[0].id === 2 || app.auth.user.UserRoles[0].id === 3 || app.auth.user.UserRoles[0].id === 7"
+                class="edit-indicator self-center" (click)="navigateToInputItem($event, 'worker', item.id)">Edit</div>
+            </div>
+            <div class="flex flex-row w-full justify-between" style="justify-content: space-between;" style="padding:0.5rem">
+              <div class="flex flex-col">
+                <div class="flex flex-row" style="margin-bottom: 5px">
+                  <ion-icon name="time-outline" style="
+                    margin-right: 10px;
+                    align-self: center;
+                    zoom: 1.1;
+                    color:var(--ion-color-primary);
+                  "></ion-icon>
+                  <span>{{ item.total_hari }} hari {{ item.total_jam }} jam</span>
+                </div>
+                <div class="flex flex-row" style="margin-bottom: 5px" *ngIf="app.auth.user.UserRoles[0].id !== 4 ">
+                  <ion-icon name="cash" style="
+                    margin-right: 10px;
+                    align-self: center;
+                    zoom: 1.1;
+                    color:var(--ion-color-secondary);
+                  "></ion-icon>
+                  <strong>{{ item.price | currency:"Rp.":true:"1.0"}}</strong>
+                </div>
+              </div>
+              <div class="self-center">
+                <div class="flex flex-row w-full justify-center text-center" style="
+                  align-self: center;
+              ">
+                  <ion-icon name="person" style="
+                      margin-right: 10px;
+                      align-self: center;
+                      zoom: 1;
+                      color:var(--ion-color-secondary);
+                    "></ion-icon>
+                  <span>
+                    <strong style="font-size: 1em;">{{ item.qty }}</strong>
+                  </span>
+                </div>
+                <div class="global-text-little-detail text-center" style="padding:0.25rem">
+                  Pekerja
+                </div>
+                <div class="flex flex-row w-full justify-center" style="
+                align-self: center;
+                text-align: center;
+            ">
+                  <ion-icon name="people" style="
+                    margin-right: 10px;
+                    align-self: center;
+                    zoom: 1;
+                    color:var(--ion-color-dark);
+                  "></ion-icon>
+                  <span>
+                    <strong style="font-size: 1em;">{{ item.qty * item.total_hari }}</strong>
+                  </span>
+                </div>
+                <div class="global-text-little-detail text-center" style="padding:0.25rem">
+                  Pekerja x hari
+                </div>
+              </div>
+            </div>
+          </div>
+        </ion-card-content>
+      </ion-card>
+    </ion-grid>
+  </ng-container>
+  <ng-container *ngIf="props.tabs.current === 'weathers'">
+    <ion-grid>
+      <ion-card (click)="navigateAdd()" [hidden]="isViewOnly">
+        <ion-card-content style="padding:0.75rem;">
+          <div class="flex flex-col" style="align-items:center">
+            <ion-icon class="expander" name="add-outline" size="large"></ion-icon>
+            <span class="global-text-little-detail">
+              {{
+              !weathers || weathers.length < 1 ? 'empty data, add data now' : 'add data' }} </span>
+          </div>
+        </ion-card-content>
+      </ion-card>
+      <div *ngIf="isViewOnly && (!weathers ||weathers.length < 1)" class="empty">-- no data --</div>
+    </ion-grid>
+    <ion-grid *ngFor="let item of weathers">
+      <ion-card class="projects.content" no-margin>
+        <ion-card-content class="global-text-regular">
+          <div class="flex flex-row justify-between">
+            <div class="global-text-regular">{{item.s_time}} s.d. {{item.e_time}}</div>
+            <div
+              *ngIf="app.auth.user.UserRoles[0].id === 2 || app.auth.user.UserRoles[0].id === 3 || app.auth.user.UserRoles[0].id === 7"
+              class="edit-indicator self-center" (click)="navigateToInputItem($event, 'weathers', item.id)">
+              Edit</div>
+          </div>
+          <div class="flex flex-row justify-between" style="margin-bottom:0.5rem;">
+            <div class="flex flex-col">
+              <div class="flex flex-col" style="margin-top:0.5rem;">
+                <div class="global-text-regular"><b>{{item.weather}}</b></div>
+                <div class="global-text-desc">{{item.info ? item.info : ''}}</div>
+              </div>
+            </div>
+            <div>
+              <ion-icon *ngIf="item.weather == 'Cerah'" color="tertiary" name="sunny" size="large"></ion-icon>
+              <ion-icon *ngIf="item.weather == 'Gerimis'" color="secondary" name="partly-sunny" size="large"></ion-icon>
+              <ion-icon *ngIf="item.weather == 'Hujan'" color="dark" name="rainy" size="large"></ion-icon>
+            </div>
+          </div>
+        </ion-card-content>
+      </ion-card>
+    </ion-grid>
+  </ng-container>
+  <ng-container *ngIf="props.tabs.current === 'pictures'">
+    <ion-grid>
+      <ion-card (click)="navigateAdd()" [hidden]="isViewOnly">
+        <ion-card-content style="padding:0.75rem;">
+          <div class="flex flex-col" style="align-items:center">
+            <ion-icon class="expander" name="add-outline" size="large"></ion-icon>
+            <span class="global-text-little-detail">
+              {{
+              !pictures || pictures.length < 1 ? 'empty data, add data now' : 'add data' }} </span>
+          </div>
+        </ion-card-content>
+      </ion-card>
+      <div *ngIf="isViewOnly && (!pictures ||pictures.length < 1)" class="empty">-- no data --</div>
+    </ion-grid>
+    <ion-grid *ngFor="let item of pictures">
+      <ion-card no-margin (click)="navigateToInputItem($event, 'pictures', item.id)">
+        <ion-card-content class="global-text-regular">
+          <ion-row>
+            <ion-col size=12>
+              <img [src]="url+item.url">
+            </ion-col>
+            <ion-col size=12 class="global-text-little-detail">{{item.info}}</ion-col>
+          </ion-row>
+        </ion-card-content>
+      </ion-card>
+    </ion-grid>
+  </ng-container>
+</ion-content>
+
+<ion-footer class="ion-padding" style="background-color:var(--ion-color-dark)" *ngIf="props.tabs.current === 'worker'">
+  <div class="flex flex-col" style="color:white">
+    <div class="flex flex-row" style="justify-content: space-between; margin-bottom: 5px;">
+      <span>Biaya Pekerja</span>
+      <strong style="color:var(--ion-color-tertiary)">
+        {{totalWorkerCost | currency:"Rp.":true:"1.0"}}
+      </strong>
+    </div>
+    <div class="flex flex-row" style="justify-content: space-between; margin-bottom: 5px;">
+      <span>Total Pekerja</span>
+      <strong style="color:var(--ion-color-tertiary)">
+        {{ totalWorker }}
+      </strong>
+    </div>
+    <div class="flex flex-row" style="justify-content: space-between; margin-bottom: 5px;">
+      <span>Total Pekerja x hari</span>
+      <strong style="color:var(--ion-color-tertiary)">
+        {{ totalWorkerPerDay }}
+      </strong>
+    </div>
+  </div>
+</ion-footer>
+
+<ion-footer>
+  <ion-toolbar mode="md" *ngIf="props.tabs.enable">
+    <ion-segment mode="md" scrollable>
+      <ion-grid>
+        <ion-row>
+          <ion-col size=4>
+            <ion-segment-button mode="md" value="previous" (click)="previousDay ? goToReport('previous') : ''"
+              [ngStyle]="!previousDay ? {'color':'grey'} : ''">
+              <ion-icon icon="chevron-back-outline"></ion-icon>
+            </ion-segment-button>
+          </ion-col>
+          <ion-col size=4 class='dead-center textcolor-light'>
+            <div class="flex flex-col">
+              <strong>{{this.date | date:'dd MMM yyyy'}}</strong>
+              <div [hidden]="!isDayOff" class="global-text-little-detail" style="
+                  background-color: red;
+                  color: white;
+                  border-radius: 0.25rem;
+                  padding: 0.1rem;
+                  margin-top: 0.1rem;
+              ">Libur</div>
+            </div>
+          </ion-col>
+          <ion-col size=4>
+            <ion-segment-button mode="md" value="next" (click)="nextDay ? goToReport('next') : ''"
+              [ngStyle]="!nextDay ? {'color':'grey'} : ''">
+              <ion-icon icon="chevron-forward-outline"></ion-icon>
+            </ion-segment-button>
+          </ion-col>
+        </ion-row>
+      </ion-grid>
+    </ion-segment>
+  </ion-toolbar>
+</ion-footer>

@@ -1,0 +1,18 @@
+// :host {
+//     ion-content {
+//         // --background: linear-gradient(135deg, #ffa64d, var(--ion-color-primary));
+//         // --background-color: rgb(236,139,94); //pastel orange
+//         // --background: rgb(16,52,166); //egyptian
+//     }
+// }
+
+.paz {
+    position: relative;
+    z-index: 10;
+}
+
+:host {
+    ion-content {
+      --background: white;
+    }
+  }

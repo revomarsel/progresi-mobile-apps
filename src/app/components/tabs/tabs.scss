@@ -1,0 +1,12 @@
+ion-toolbar {
+    // border-radius: 0px 0px 20px 20px;
+    border-radius: 0px;
+}
+
+:host(.ion-color) .toolbar-background {
+    background-color: white !important;
+    // padding-left: unset;
+    // padding-right: unset;
+    // padding-inline-start: var(--padding-start);
+    // padding-inline-end: var(--padding-end);
+}

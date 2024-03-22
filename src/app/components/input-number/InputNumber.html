@@ -1,0 +1,8 @@
+<div class="flex flex-row w-full" (click)="openInput()">
+    <!-- <span class="self-center text-ellipsis" style="margin-left: 0.2rem;">{{ formattedAmount | number:'0.0-2'}}</span> -->
+    <ion-input name="numInput" id="numInput" #numInput type="text" inputmode="numeric" (ionInput)="handleInput($event)"></ion-input>
+</div>
+
+
+<!-- <ion-input name="numInput" id="numInput" #numInput type="number" inputmode="numeric" style="opacity:1; padding:0;"
+(keyup)="handleKeyUp($event)" (ionInput)="handleInput($event)"></ion-input> -->

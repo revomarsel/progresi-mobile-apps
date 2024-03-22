@@ -1,0 +1,113 @@
+<ion-header>
+	<ion-toolbar color="primary">
+		<ion-buttons slot="start">
+			<ion-button color="primary" (click)="closeModal()">
+				<ion-icon name="close" color="light"></ion-icon>
+			</ion-button>
+		</ion-buttons>
+		<ion-title>
+			Filter
+		</ion-title>
+	</ion-toolbar>
+</ion-header>
+
+<ion-content class="padding">
+	<ion-list *ngFor="let item of filterParam; let i = index" class="form-spacer">
+		<!-- text -->
+		<ion-item *ngIf="item.input === 'text'">
+			<ion-label class="fw500" position="stacking">{{item.name}}</ion-label>
+			<ion-input [(ngModel)]="item.value" ngDefaultControl></ion-input>
+			<ion-buttons slot="end">
+				<ion-button size="small" shape="round" (click)="deleteVal(i)" style="color:var(--ion-color-dark)">
+					<ion-icon icon="close"></ion-icon>
+				</ion-button>
+			</ion-buttons>
+		</ion-item>
+		<!-- dropdown -->
+		<div *ngIf="item.input === 'dropdown'">
+			<div *ngIf="item.valueType === date">
+				<ion-item>
+					<ion-label class="fw500" position="stacking">{{item.name}}</ion-label>
+					<ion-select [(ngModel)]="item.value" *ngIf="item.valueType === date" ngDefaultControl>
+						<ion-select-option *ngFor="let i of item.selectValues" [value]="i">
+							{{i | date:'dd MMM yyyy'}}
+						</ion-select-option>
+					</ion-select>
+					<ion-buttons slot="end">
+						<ion-button size="small" shape="round" (click)="deleteVal(i)"
+							style="color:var(--ion-color-dark)">
+							<ion-icon icon="close"></ion-icon>
+						</ion-button>
+					</ion-buttons>
+				</ion-item>
+			</div>
+			<div *ngIf="item.valueType !== date">
+				<ion-item>
+					<ion-label class="fw500">{{item.name}}</ion-label>
+					<div>
+						<ionic-selectable [(ngModel)]="selectableFilter && selectableFilter[i]"
+							[items]="item.selectValues" [itemValueField]="item.key" [itemTextField]="item.key"
+							[canSearch]="true" (onChange)="assignValueCustom(i, $event)">
+						</ionic-selectable>
+					</div>
+					<ion-buttons slot="end">
+						<ion-button size="small" shape="round" (click)="deleteVal(i)"
+							style="color:var(--ion-color-dark)">
+							<ion-icon icon="close"></ion-icon>
+						</ion-button>
+					</ion-buttons>
+				</ion-item>
+			</div>
+		</div>
+		<!-- dropdown regular -->
+		<div *ngIf="item.input === 'dropdownRegular'">
+			<ion-item>
+				<ion-label class="fw500" position="stacking">{{item.name}}</ion-label>
+				<ion-select [(ngModel)]="item.value" placeholder="Select" ngDefaultControl
+					(ionChange)="assignValue(i, $event)">
+					<ion-select-option *ngFor="let i of item.selectValues">{{i.name}}</ion-select-option>
+				</ion-select>
+				<ion-buttons slot="end">
+					<ion-button size="small" shape="round" (click)="deleteVal(i)" style="color:var(--ion-color-dark)">
+						<ion-icon icon="close"></ion-icon>
+					</ion-button>
+				</ion-buttons>
+			</ion-item>
+		</div>
+		<!-- date scroll -->
+		<ion-item *ngIf="item.input == 'scroll' || item.input == 'date'">
+			<ion-label class="fw500" position="stacking">{{item.name}}</ion-label>
+			<ion-datetime displayFormat="DD MMM YYYY" [min]="min_date" [max]="max_date" placeholder="Pilih Tanggal"
+				[(ngModel)]="item.value" (ionChange)="convertDate(i, $event)" ngDefaultControl></ion-datetime>
+			<ion-buttons slot="end">
+				<ion-button size="small" shape="round" (click)="deleteVal(i)" style="color:var(--ion-color-dark)">
+					<ion-icon icon="close"></ion-icon>
+				</ion-button>
+			</ion-buttons>
+		</ion-item>
+		<div *ngIf="item.input == 'date_range'">
+			<strong class="global-text-regular ion-padding">{{item.name}}</strong>
+			<ion-item>
+				<ion-label class="fw500" position="stacking">Dari</ion-label>
+				<ion-datetime displayFormat="DD MMM YYYY" [min]="min_date" [max]="max_date" placeholder="Pilih Tanggal"
+					[(ngModel)]="item.from" (ionChange)="convertDateRange(i, $event, 'from')" ngDefaultControl></ion-datetime>
+				<ion-buttons slot="end">
+					<ion-button size="small" shape="round" (click)="deleteDateRange(i, 'from')" style="color:var(--ion-color-dark)">
+						<ion-icon icon="close"></ion-icon>
+					</ion-button>
+				</ion-buttons>
+			</ion-item>
+			<ion-item>
+				<ion-label class="fw500" position="stacking">Hingga</ion-label>
+				<ion-datetime displayFormat="DD MMM YYYY" [min]="min_date" [max]="max_date" placeholder="Pilih Tanggal"
+					[(ngModel)]="item.to" (ionChange)="convertDateRange(i, $event, 'to')" ngDefaultControl></ion-datetime>
+				<ion-buttons slot="end">
+					<ion-button size="small" shape="round" (click)="deleteDateRange(i, 'to')" style="color:var(--ion-color-dark)">
+						<ion-icon icon="close"></ion-icon>
+					</ion-button>
+				</ion-buttons>
+			</ion-item>
+		</div>
+	</ion-list>
+	<ion-button expand="full" expand="block" color="primary" (click)="closeModal()">Filter Results</ion-button>
+</ion-content>

@@ -1,0 +1,191 @@
+<HeaderGlobal [props]="props" (event)="eventHandler($event)"></HeaderGlobal>
+
+<ion-content>
+  <ion-refresher slot="fixed" (ionRefresh)="ionRefresh($event)" (ionPull)="app.ionPull($event)"
+    (ionStart)="app.ionStart($event)">
+    <ion-refresher-content pullingIcon="arrow-dropdown" pullingText="Pull to refresh" refreshingSpinner="circles"
+      refreshingText="Refreshing...">
+    </ion-refresher-content>
+  </ion-refresher>
+  <!-- <ion-item [hidden]="!minDate || !maxDate" class="bg-dark text-white"> -->
+    <div class="flex flex-row w-full justify-between bg-dark" style="padding: 0.5rem">
+      <div class="flex flex-row self-center">
+        <ion-label class="global-text-regular text-white"><b>Tanggal Laporan</b></ion-label>
+      </div>
+      <div>
+        <ion-datetime displayFormat="DD MMM YYYY" [min]="minDate" [max]="maxDate" placeholder="Pilih Tanggal"
+      (ionChange)="searchReport($event)"></ion-datetime>
+      </div>
+    </div>
+  <!-- </ion-item> -->
+  <ion-card *ngFor="let item of data_paging" class="global-text-regular" style="padding: 1rem;">
+    <div class="flex flex-col w-full">
+      <div class="flex flex-row justify-between w-full" style="padding: 0.25rem 0 0.25rem 0;" (click)="expandData(item.id)">
+        <div>
+          <strong>Minggu ke-{{ data.length - item.id }} : <span style="color:var(--ion-color-primary)">{{item.week | date:'dd MMM yyyy'}}</span></strong>
+        </div>
+        <div class="flex flex-row">
+          <div *ngIf = "item.isEditable" style="color:var(--ion-color-primary); zoom:1.25">
+            <ion-icon name="pencil"></ion-icon>&nbsp;
+          </div>
+          <ion-icon class="justify-end" [name]="item.expanded ? 'chevron-up-outline' : 'chevron-down-outline'" style="margin-left: 5px;"></ion-icon>
+        </div>
+      </div>
+      <Accordion expandHeight="1600px" [expanded]="item.expanded">
+        <div *ngFor="let content of item.reports" (click)="content.status !== 'Libur' && content.status !== 'Empty' ? navPage(content) : alertContent(event, content.status)">
+          <div class="flex flex-col" style="padding:0.5rem; border-bottom: 1px solid grey;">
+            <div class="flex flex-col w-full">
+              <div class="flex flex-row w-full justify-between" style="margin-bottom: 0.2rem;">
+                <div class="global-text-regular" 
+                [ngStyle]="
+                  content.status === 'Libur' ? {'color':'red'} :
+                  content.status === 'Empty' ? {'color':'grey'} :
+                  content.status === 'Create' ? {'color':'green'} : 
+                  content.status === 'Editable' ? {'color':'var(--ion-color-primary)'} :
+                  {'color':'black'
+                }"
+                ><b>{{content.day | date:'dd MMM yyyy'}}</b></div>
+                <div class="flex flex-row self-center" [ngStyle]="
+                  content.status === 'Libur' ? {'color':'red'} :
+                  content.status === 'Empty' ? {'color':'grey'} :
+                  content.status === 'Create' ? {'color':'green'} : {'color':'var(--ion-color-primary)'}">
+                  <div>
+                    <ion-icon [name]="
+                    content.status === 'Create' ? 'add-sharp' :
+                    content.status === 'Libur' ? 'calendar-sharp' :
+                    content.status === 'Readonly' ? '' : 
+                    content.status === 'Empty' ? 'folder-open-sharp' : 'pencil'
+                  " slot="icon-only">
+                    </ion-icon>&nbsp;
+                  </div>
+                  <div class="global-text-desc" style="text-align: right;">
+                    <b>{{
+                    content.status === 'Create' ? 'Create' :
+                    content.status === 'Libur' ? 'Libur' :
+                    content.status === 'Readonly' ? '' :
+                    content.status === 'Empty' ? 'Empty' : 'Edit'
+                    }}</b>
+                  </div>
+                </div>
+              </div>
+              <div class="flex flex-row w-full justify-between" style="padding:0.3rem; background: #ececec; border-radius: 20px;">
+                <div class="flex flex-col w-quarter items-center"
+                  [ngStyle]="content.reported ? {'color':'var(--ion-color-primary)'} : {'color':'grey'}">
+                  <ion-icon name="document-text" size="large" style="height: 30px"></ion-icon>
+                  <span style="font-size: 0.5rem; text-align: center;">Laporan Harian</span>
+                </div>
+                <div class="flex flex-col w-quarter items-center"
+                  [ngStyle]="content.material_used ? {'color':'var(--ion-color-primary)'} : {'color':'grey'}">
+                  <ion-icon name="cube" size="large" style="height: 30px"></ion-icon>
+                  <span style="font-size: 0.5rem; text-align: center;">Material Terpakai</span>
+                </div>
+                <div class="flex flex-col w-quarter items-center"
+                  [ngStyle]="content.trouble ? {'color':'red'} : {'color':'grey'}">
+                  <div class="self-center" style="height: 30px; font-size: 26px;">{{content.trouble}}</div>
+                  <span style="font-size: 0.5rem; text-align: center;">Kendala Lapangan</span>
+                </div>
+                <div class="flex flex-col w-quarter items-center"
+                  [ngStyle]="content.safety ? {'color':'red'} : {'color':'grey'}">
+                  <div class="self-center" style="height: 30px; font-size: 26px;">{{content.safety}}</div>
+                  <span style="font-size: 0.5rem; text-align: center;">Kendala Safety</span>
+                </div>
+              </div>
+            </div>
+            <div class="global-text-little-detail" style="margin: 0.5rem 0 0.25rem 0" *ngIf="content.created_time">
+              <div class="flex flex-row w-full justify-between">
+                <span class="self-center">Input Date</span>
+                <span>{{content.created_time | date:'dd MMM yyyy'}}</span>
+              </div>
+              <div class="flex flex-row w-full justify-between" style="margin: 0.25rem 0 0.25rem 0" *ngIf="content.last_used_by">
+                <span class="self-center">Last Access</span>
+                <div class="flex flex-col" style="text-align: right;">
+                  <b>{{content.last_used_by}}</b>
+                  <span>{{content.last_used | date:'dd MMM yyyy'}}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </Accordion>
+    </div>
+  </ion-card>
+  <ion-infinite-scroll threshold="100px" (ionInfinite)="loadData($event)">
+    <ion-infinite-scroll-content loadingSpinner="bubbles" loadingText="Loading more data...">
+    </ion-infinite-scroll-content>
+  </ion-infinite-scroll>
+</ion-content>
+
+
+<!-- <ion-grid>
+  <ion-row style="position:relative !important;">
+    <ion-col size=10>
+      <strong>Minggu ke-{{ data.length - item.id }}: {{item.week | date:'dd MMM yyyy'}}</strong>&nbsp;
+      <ion-icon [name]="item.isComplete && 'checkmark-circle-sharp'" style="zoom:1.5; vertical-align: middle;"
+      [color]="'success'"></ion-icon>
+    </ion-col>
+    <ion-col size=2 style="text-align: right;">
+      <ion-icon [name]="item.expanded ? 'chevron-up-outline' : 'chevron-down-outline'"></ion-icon>
+    </ion-col>
+    <ion-grid>
+      <Accordion expandHeight="220px" [expanded]="item.expanded">
+        <ion-row>
+          <ion-col size=6 *ngFor="let content of item.reports">
+            <ion-button expand="full" fill="clear" class="keypad-button" style="color: var(--ion-color-primary);"
+              (click)="content.status !== 'Libur' && content.status !== 'Empty' ? navPage(content) : ''">
+              <div [ngStyle]="
+                  content.status === 'Libur' ? {'color':'red'} :
+                  content.status === 'Empty' ? {'color':'grey'} :
+                  content.status === 'Create' ? {'color':'green'} : ''
+                ">
+                <ion-icon 
+                  [name]="
+                    content.status === 'Create' ? 'add-sharp' :
+                    content.status === 'Libur' ? 'calendar-sharp' :
+                    content.status === 'Readonly' ? 'folder-sharp' : 
+                    content.status === 'Empty' ? 'folder-open-sharp' : 'pencil'
+                  " 
+                  slot="icon-only" 
+                  size=small
+                >
+                </ion-icon>
+                <ion-label style="margin-top: 5px;">{{content.day | date:'dd MMM yyyy'}}</ion-label>
+              </div>
+            </ion-button>
+          </ion-col>
+        </ion-row>
+      </Accordion>
+    </ion-grid>
+  </ion-row>
+</ion-grid> -->
+
+
+<!-- <div class="flex flex-row w-full justify-between" style="padding:0.5rem">
+  <div class="global-text-desc">
+    {{content.day | date:'dd MMM yyyy'}}
+  </div>
+  <div class="flex flex-col global-text-desc" style="text-align: center;">
+    <div style="padding: 0.25rem 0 0 0">
+      <ion-icon [name]="content.reported ? 'checkmark' : 'close'" style="vertical-align: middle;"></ion-icon>
+    </div>
+    <div class="global-text-little-detail">Ada Laporan</div>
+    <div style="padding: 0.25rem 0 0 0">
+      <ion-icon [name]="content.material_used ? 'checkmark' : 'close'" style="vertical-align: middle;">
+      </ion-icon>
+    </div>
+    <div class="global-text-little-detail">Material terpakai</div>
+  </div>
+  <div class="flex flex-col global-text-desc" style="text-align: center;">
+    <div style="padding: 0.25rem 0 0 0">
+      3
+    </div>
+    <div class="global-text-little-detail">Kendala lapangan</div>
+    <div style="padding: 0.25rem 0 0 0">
+      2
+    </div>
+    <div class="global-text-little-detail">Kendala safety</div>
+  </div>
+</div>
+<div class="global-text-little-detail" style="text-align: right;">
+  last accessed by admin at 2021-04-05
+</div>
+<div class="hr"></div> -->

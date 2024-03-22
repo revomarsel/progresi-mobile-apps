@@ -1,0 +1,14 @@
+{
+  "inDev": false,
+  "dev": {
+    "baseURL": "https://d3v.progresi.co.id/",
+    "URL": "https://d3v.progresi.co.id/index.php?r="
+  },
+  "prod": {
+    "baseURL": "https://app.progresi.co.id/",
+    "URL": "https://app.progresi.co.id/index.php?r="
+  },
+  "uri": {
+    "repo": "/progresi"
+  }
+}

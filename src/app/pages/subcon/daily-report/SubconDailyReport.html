@@ -1,0 +1,38 @@
+<HeaderGlobal [props]="props" (event)="eventHandler($event)"></HeaderGlobal>
+
+<ion-content>
+  <ion-refresher slot="fixed" (ionRefresh)="ionRefresh($event)" (ionPull)="app.ionPull($event)"
+    (ionStart)="app.ionStart($event)">
+    <ion-refresher-content pullingIcon="arrow-dropdown" pullingText="Pull to refresh" refreshingSpinner="circles"
+      refreshingText="Refreshing...">
+    </ion-refresher-content>
+  </ion-refresher>
+  <ion-item [hidden]="!minDate || !maxDate">
+    <ion-icon name="chevron-forward-outline"></ion-icon>
+    <ion-label>Tanggal Laporan</ion-label>
+    <ion-datetime displayFormat="DD MMM YYYY" [min]="minDate" [max]="maxDate" placeholder="Pilih Tanggal"
+      (ionChange)="searchReport($event)"></ion-datetime>
+  </ion-item>
+  <ion-item *ngFor="let item of data" class="global-text-regular" (click)="navPage(item)">
+    <div class="flex flex-row justify-between w-full" style="margin: 0.5rem 0 0.5rem 0">
+      <div class="flex flex-col">
+        <div class="flex flex-row">
+          <ion-icon name="calendar-sharp" style="margin-right: 0.2rem;"></ion-icon>
+          <strong>{{item.date | date:'dd MMM yyyy'}}</strong>
+        </div>
+        <div class="flex flex-row global-text-little-detail" *ngIf="item.date_created">
+          <ion-icon name="pencil-sharp"  style="margin-right: 0.2rem;"></ion-icon>
+          <span>{{item.date_created | date:'dd MMM yyyy HH:mm:ss'}}</span>
+        </div>
+      </div>
+      <div class="flex flex-col items-center">
+        <strong>{{item.approved_task}} / {{item.total_task}}</strong>
+        <span class="global-text-little-detail">Task Disetujui</span>
+      </div>
+    </div>
+  </ion-item>
+  <ion-infinite-scroll threshold="100px" (ionInfinite)="loadData($event)">
+    <ion-infinite-scroll-content loadingSpinner="bubbles" loadingText="Loading more data...">
+    </ion-infinite-scroll-content>
+  </ion-infinite-scroll>
+</ion-content>

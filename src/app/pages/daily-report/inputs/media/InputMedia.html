@@ -1,0 +1,90 @@
+<HeaderGlobal [props]="props" (event)="eventHandler($event)"></HeaderGlobal>
+
+<ion-content>
+    <div *ngIf="!expandNavigator" style="
+        height: 70%;
+        overflow-y: scroll;
+        position: relative;
+    ">
+        <div style="
+            position:absolute; 
+            background-color: white;
+            width: 100%;
+        ">
+            <div style="padding: 30px;" *ngIf="data && data.length > 0">
+                <div style="margin-bottom: 20px">
+                    <ion-slides [options]="sliderOpts" zoom>
+                        <ion-slide>
+                            <div class="swiper-zoom-container" style="min-height: 225px;">
+                                <img [src]="data[selectedMediaIdx].file ? data[selectedMediaIdx].file : 
+                                    data[selectedMediaIdx].url ? getRepoImage(data[selectedMediaIdx].url) :
+                                    '/assets/img/img-empty.png' 
+                                ">
+                            </div>
+                        </ion-slide>
+                    </ion-slides>
+                    <ion-button size="medium" expand="full" expand="block" color="secondary" (click)="takePicture()"
+                        style="margin-top: 20px;">
+                        <ion-icon name="camera"></ion-icon>
+                        &nbsp;Upload Foto
+                    </ion-button>
+                </div>
+                <div style="margin-bottom: 20px;">
+                    <span class="textcolor-dark"><strong>Info</strong></span>
+                    <ion-item style="margin-bottom: 10px;" class="ion-no-padding">
+                        <ion-input type="text" [(ngModel)]="data[selectedMediaIdx].info" [disabled]="isViewMode">
+                        </ion-input>
+                    </ion-item>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="input-item-navigator">
+        <p style="color:white">Foto pada {{day | date:'dd MMM yyyy'}}</p>
+        <ion-icon [name]="!expandNavigator ? 'chevron-up-sharp' : 'chevron-down-sharp'"
+            style="color:var(--ion-color-tertiary)" (click)="expandNavigator = !expandNavigator">
+        </ion-icon>
+    </div>
+    <div *ngIf="data && data.length > 0" [ngStyle]="
+        {
+            'height': !expandNavigator ? '25%' : '95%',
+            'position': 'relative',
+            'overflow-y': 'scroll'
+        }
+    ">
+        <div style="
+            position: absolute;
+            width: 100%;
+        ">
+            <ion-item *ngFor="let item of data; let idx = index" [ngStyle]="
+                {
+                    'padding': '5px 0px 0px 0px',
+                    'min-height' : '50px',
+                    'background-color': selectedMediaIdx === idx ? 'var(--ion-color-tertiary)' : 
+                    !data[idx].url && !data[idx].file ? 'grey' : ''
+                }
+                " (click)="changeSelectedMedia(idx)">
+                <div style="width: 95%; display: flex; flex-direction: row;">
+                    <div style="width: 5%; align-self: center;">
+                        {{idx + 1}}.
+                    </div>
+                    <div style="display: flex; flex-direction: row; width: 90%">
+                        <ion-thumbnail slot="start" style="margin-right: 5px;">
+                            <img [src]="item.file ? item.file : 
+                                item.url ? getRepoImage(item.url) :
+                                '/assets/img/img-empty.png'
+                            ">
+                        </ion-thumbnail>
+                        <span class="text-ellipsis" style="align-self: center;">
+                            {{item.info}}
+                        </span>
+                    </div>
+                </div>
+                <div style="width: 5%;">
+                    <ion-icon *ngIf="!item.readonly" name="close" style="color:maroon; zoom: 1.1"
+                        (click)="deleteData(idx, item.id)"></ion-icon>
+                </div>
+            </ion-item>
+        </div>
+    </div>
+</ion-content>

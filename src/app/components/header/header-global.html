@@ -1,0 +1,75 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start" *ngIf="!props.isRoot">
+      <ion-button size="small" (click)="navigateBack()">
+        <ion-icon name="arrow-back-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <div style="margin-left: 0.75rem">
+      <ion-text color="light" style="font-size: 1rem" class="fw700"
+        >{{props.title}}</ion-text
+      >
+    </div>
+    <ion-buttons slot="end">
+      <ion-button
+        size="small"
+        shape="round"
+        (click)="setNotificationStatus()"
+        *ngIf="props.notification"
+      >
+        <ion-icon
+          [name]="notification_status === 1 ? 'notifications-outline' : 'notifications-off-outline'"
+        ></ion-icon>
+      </ion-button>
+      <ion-button
+        size="small"
+        shape="round"
+        (click)="enableSearch()"
+        *ngIf="props.search && !props.search.inPopover"
+        [hidden]="props.search && props.search.hidden"
+      >
+        <ion-icon
+          name="search"
+          [ngClass]="props.search.enable ? 'highlight' : ''"
+        ></ion-icon>
+      </ion-button>
+      <ion-button
+        size="small"
+        shape="round"
+        (click)="enableFilter()"
+        *ngIf="props.filter && !props.filter.inPopover"
+        [hidden]="props.filter && props.filter.hidden"
+      >
+        <ion-icon
+          name="filter-sharp"
+          [ngClass]="props.filter.enable ? 'highlight' : ''"
+        ></ion-icon>
+      </ion-button>
+      <ion-button
+        size="small"
+        shape="round"
+        (click)="enableCustomFilter()"
+        *ngIf="props.customFilter && !props.customFilter.inPopover"
+        [hidden]="props.customFilter && props.customFilter.hidden"
+      >
+        <ion-icon name="options-outline"></ion-icon>
+      </ion-button>
+      <div *ngFor="let item of headerButtons">
+        <ion-button (click)="item.func()">
+          <ion-icon [name]="item.icon"></ion-icon>
+        </ion-button>
+      </div>
+      <ion-button
+        size="small"
+        shape="round"
+        (click)="presentPopover($event)"
+        *ngIf="props.popover"
+        [hidden]="props.popover.hidden"
+      >
+        <ion-icon
+          [name]="props.popover.icon ? props.popover.icon : 'menu-outline'"
+        ></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>

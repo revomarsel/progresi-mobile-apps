@@ -1,0 +1,130 @@
+<ion-content class="ion-padding animated fadeIn login auth-page">
+  <div class="theme-bg"></div>
+  <div class="auth-content">
+
+    <!-- Logo -->
+    <div padding-horizontal text-center class="animated fadeInDown" style="text-align: center">
+      <div *ngIf="!companyData.logo || companyData.logo === null" class="logo"></div>
+      <ion-thumbnail *ngIf="companyData.logo || companyData.logo !== null" slot="start" style="margin-right: 5px;width: 100%;text-align: center;height: 100%;margin: 50px 0px 25px 0px;">
+          <img style="width: 200px;height: 100%;" [src]="companyData.logo ? getRepoImage(companyData.logo) :
+          '/assets/img/img-empty.png'
+      "></ion-thumbnail>
+      <b>{{companyData.company_name}}</b>
+    </div>
+
+    <!-- Login form -->
+    <form *ngIf="!isInputCode" (ngSubmit)="login()" [formGroup]="onLoginForm" class="list-form">
+      <ion-item class="animated fadeInUp form-spacer">
+        <ion-label position="floating">
+          <ion-icon name="person"></ion-icon>
+          Username
+        </ion-label>
+        <ion-input type="text" [(ngModel)]="credentials.username" formControlName="username"></ion-input>
+      </ion-item>
+      <ion-item class="animated fadeInUp form-spacer">
+        <ion-label position="floating">
+          <ion-icon name="lock-closed"></ion-icon>
+          Password
+        </ion-label>
+        <ion-input [(ngModel)]="credentials.password" [type]="!showPass ? 'password' : 'text'"
+          formControlName="password"></ion-input>
+        <ion-icon slot="end" [name]="!showPass ? 'eye-off-outline' : 'eye-outline'" class="icon-input-center"
+          (click)="hidePass()"></ion-icon>
+      </ion-item>
+      <div class="form-spacer" style="height:85px">
+        <ion-button [hidden]="isLoading" size="medium" expand="full" expand="block" type="submit" [disabled]="!onLoginForm.valid" tappable>
+          <ion-icon name="log-in"></ion-icon>
+          Login
+        </ion-button>
+        <div class="center-item" >
+          <ion-spinner [hidden]="!isLoading" name="dots"></ion-spinner>
+        </div>
+      </div>
+      <div style="margin:10px 0px" class="d-flex"> <hr style="margin-right: 10px;">atau <hr style="margin-left: 10px;"> </div>
+      <div class="form-spacer ion-text-center pb-0" *ngIf="!isApple">
+        <a class="border-button font-weight-bold d-block text-primary text-center" href="https://progresi.co.id/demo">Belum punya akun ? <b>Daftar</b></a>
+      </div>
+      <div class="form-spacer ion-text-center">
+        <a (click)="( isInputCode === true ? (isInputCode= false) : (isInputCode= true) )" class="border-button font-weight-bold d-block mb-2 text-primary text-center">Masukan <b>Kode Perusahaan</b></a>
+      </div>
+    </form>
+    <form *ngIf="isInputCode" (ngSubmit)="getCompany()" [formGroup]="onLoginForm" class="list-form">
+      <ion-item class="animated fadeInUp form-spacer">
+        <ion-label position="floating">
+          <ion-icon name="person"></ion-icon>
+          Nama Perusahaan
+        </ion-label>
+        <ion-input type="text" [(ngModel)]="companyPOST.company" formControlName="username"></ion-input>
+      </ion-item>
+      <div class="form-spacer" style="height:85px;position: relative;">
+        <div class="center-item" >
+          <ion-spinner [hidden]="!isLoading" name="dots"></ion-spinner>
+        </div>
+        <ion-button [hidden]="isLoading" size="medium" expand="full" expand="block" type="submit" tappable>
+          <ion-icon name="log-in"></ion-icon>
+          Submit
+        </ion-button>
+      </div>
+      <div style="margin:10px 0px" class="d-flex"> <hr style="margin-right: 10px;">atau <hr style="margin-left: 10px;"> </div>
+      <div class="form-spacer ion-text-center">
+        <a (click)="( isInputCode === true ? (isInputCode= false) : (isInputCode= true) )" class="border-button font-weight-bold d-block mb-2 text-primary text-center"><b>Login & Register</b></a>
+      </div>
+    </form>
+
+    <!-- <p text-right tappable (click)="forgotPass()" class="paz">
+      <ion-text color="light">
+        <strong>Lupa Password?</strong>
+      </ion-text>
+    </p> -->
+
+    <!-- <div> -->
+    <!-- login with other APIs -->
+    <!-- <p text-center>
+        <ion-text color="light">
+          Or Signin with:
+        </ion-text>
+      </p>
+
+      <ion-grid class="btn-group">
+        <ion-row>
+          <ion-col size="4">
+            <ion-button shape="round" expand="full" color="secondary">
+              <ion-icon slot="icon-only" name="logo-facebook"></ion-icon>
+            </ion-button>
+          </ion-col>
+          <ion-col size="4">
+            <ion-button shape="round" expand="full" color="secondary">
+              <ion-icon slot="icon-only" name="logo-twitter"></ion-icon>
+            </ion-button>
+          </ion-col>
+          <ion-col size="4">
+            <ion-button shape="round" expand="full" color="secondary">
+              <ion-icon slot="icon-only" name="logo-googleplus"></ion-icon>
+            </ion-button>
+          </ion-col>
+        </ion-row>
+      </ion-grid> -->
+    <!-- </div> -->
+
+    <!-- Other links -->
+    <!-- <div text-center margin-top>
+      <span (click)="goToRegister()" class="paz" tappable>
+        <ion-text color="light">
+          Belum punya akun? <strong>Registrasi</strong>
+        </ion-text>
+      </span>
+    </div> -->
+
+  </div>
+</ion-content>
+<ion-footer *ngIf="companyData.alamat" class="ion-padding auth-footer" style="background-color: #f5f5f5;">
+  <div class="flex flex-col" style="padding: 0.5rem">
+    <span style="text-align:center;font-size:0.5;">{{companyData.alamat}}</span>
+  </div>
+</ion-footer>
+<ion-footer class="ion-padding auth-footer">
+  <div class="flex flex-col" style="padding: 0.5rem">
+    <span style="text-align:center;font-size:0.5;">By <b>
+      {{ companyData && (companyData.company_name ? companyData.company_name : "PT. Konstruksi Digital Indonesia") }}</b></span>
+  </div>
+</ion-footer>

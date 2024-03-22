@@ -1,0 +1,90 @@
+<HeaderGlobal [props]="props" (event)="eventHandler($event)"></HeaderGlobal>
+<ion-toolbar *ngIf="props.search.enable" color="dark">
+  <ion-searchbar
+    slot="start"
+    [(ngModel)]="searchKey"
+    (ionChange)="searchValue()"
+    (ionClear)="cancelSearch()"
+    showCancelButton="focus"
+    animated
+  ></ion-searchbar>
+</ion-toolbar>
+<Filter
+  *ngIf="props.filter.enable"
+  [props]="props.filter"
+  (event)="eventHandler($event)"
+></Filter>
+
+<ion-content>
+  <ion-refresher
+    [disabled]="props.virtualScrollOptions.disablePullToRefresh"
+    slot="fixed"
+    (ionRefresh)="ionRefresh($event)"
+    (ionPull)="app.ionPull($event)"
+    (ionStart)="app.ionStart($event)"
+  >
+    <ion-refresher-content
+      pullingIcon="arrow-dropdown"
+      pullingText="Pull to refresh"
+      refreshingSpinner="circles"
+      refreshingText="Refreshing..."
+    >
+    </ion-refresher-content>
+  </ion-refresher>
+  <div class="center-item">
+    <ion-spinner
+      [hidden]="isDataEmpty || (data && data.length > 0)"
+      name="dots"
+    ></ion-spinner>
+    <div *ngIf="isDataEmpty && (data && data.length < 1)">-- NO DATA --</div>
+  </div>
+  <virtual-scroller
+    #scroll
+    [items]="data"
+    (vsUpdate)="props.virtualScrollOptions.setState($event)"
+  >
+    <ion-item
+      (click)="goToThread(item)"
+      *ngFor="let item of scroll.viewPortItems"
+      class="bg-white"
+    >
+      <ion-grid class="grid-custom">
+        <ion-row class="global-text-regular">
+          <strong>{{item.topic}}</strong>&nbsp;
+          <ion-icon
+            [name]="item.status === 'Closed' && 'lock-closed-outline'"
+          ></ion-icon>
+        </ion-row>
+        <ion-row class="global-text-regular" style="margin-top: 10px"
+          >{{item.project_name}}</ion-row
+        >
+        <ion-row class="global-text-little-detail">
+          <ion-icon name="chatbubble-ellipses-outline"></ion-icon
+          >&nbsp;{{item.ticket}}
+        </ion-row>
+        <ion-row
+          style="margin-top: 15px"
+          class="global-text-little-detail ion-text-wrap"
+        >
+          <ion-icon name="person"></ion-icon>&nbsp;{{item.username}}
+        </ion-row>
+        <ion-row
+          style="margin-top: 5px"
+          class="global-text-little-detail ion-text-wrap"
+        >
+          <ion-icon name="calendar"></ion-icon>&nbsp;{{
+          alpro.dateFormat(item.created_time) }}
+        </ion-row>
+      </ion-grid>
+    </ion-item>
+  </virtual-scroller>
+</ion-content>
+
+<ion-footer>
+  <Options
+    *ngIf="props.options && props.options.enable"
+    [props]="props.options"
+    (event)="eventHandler($event)"
+  >
+  </Options>
+</ion-footer>

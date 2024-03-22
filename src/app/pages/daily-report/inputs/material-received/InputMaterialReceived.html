@@ -1,0 +1,191 @@
+<HeaderGlobal [props]="props" (event)="eventHandler($event)"></HeaderGlobal>
+<ion-toolbar mode="md" color="dark" style="padding: 0 1rem 0 1rem;">
+    <ionic-selectable #batchSelection [items]="itemsList" itemValueField="thm_id" itemTextField="material_name"
+        groupValueField="is_today" groupTextField="is_today" [canSearch]="true" (onChange)="selectBatch($event); app.setDirty(); preventDuplicate();"
+        placeholder="Input Multipel Material" [isMultiple]="true" (onSearch)="searchBatch($event, itemsList);">
+        <ng-template ionicSelectableTitleTemplate>Daftar Material</ng-template>
+        <ng-template ionicSelectableGroupTemplate let-group="group">
+            {{group.text ? 'Today`s Arrival' : 'Others'}}
+        </ng-template>
+        <ng-template ionicSelectableItemTemplate let-item="item">
+            <p class="text-ellipsis">
+                {{item.material_name}}
+                <br>
+                -------
+                <br>
+                {{item.task_parent}}
+                <br>
+                {{item.task_name}}
+            </p>
+        </ng-template>
+    </ionic-selectable>
+</ion-toolbar>
+
+<ion-content>
+    <div *ngIf="!expandNavigator" style="
+        height: 60%;
+        overflow-y: scroll;
+        position: relative;
+    ">
+        <div style="
+            position:absolute; 
+            background-color: white;
+            width: 100%;
+        ">
+            <div style="padding: 30px;" *ngIf="data && data.length > 0">
+                <div style="max-width: 85vw;">
+                    <span class="textcolor-dark">
+                        <strong>Material</strong>
+                        <span style="color:red">&nbsp;*</span>
+                    </span>
+                    <ion-item style="margin-bottom: 20px;" class="ion-no-padding">
+                        <ionic-selectable [(ngModel)]="selectedItem" [items]="itemsList"
+                            [disabled]="data[selectedItemIdx].readonly" itemValueField="thm_id"
+                            itemTextField="material_name" groupValueField="is_today" groupTextField="is_today"
+                            [canSearch]="true" (onChange)="changeItem($event); app.setDirty(); preventDuplicate();" placeholder="Material">
+                            <ng-template ionicSelectableTitleTemplate>Daftar Material</ng-template>
+                            <ng-template ionicSelectableGroupTemplate let-group="group">
+                                {{group.text ? 'Today`s Arrival' : 'Others'}}
+                            </ng-template>
+                            <ng-template ionicSelectableItemTemplate let-item="item">
+                                <p class="text-ellipsis">
+                                    {{item.material_name}}
+                                    <br>
+                                    -------
+                                    <br>
+                                    {{item.task_parent}}
+                                    <br>
+                                    {{item.task_name}}
+                                </p>
+                            </ng-template>
+                        </ionic-selectable>
+                    </ion-item>
+                    <p ion-text color="danger" class="text08"
+                        *ngIf="errorMsg[selectedItemIdx] && errorMsg[selectedItemIdx].material_code">
+                        <ion-text color="danger">
+                            Material tidak boleh kosong
+                        </ion-text>
+                    </p>
+                </div>
+                <div class="flex flex-row w-full" style="margin-bottom: 10px; justify-content: space-between;">
+                    <strong class="center-self" style="width: 75%;">
+                        Harga Satuan
+                    </strong>
+                    <!-- <div style="align-self:center;">{{data[selectedItemIdx].price | currency:"Rp.":true:"1.0"}}
+                    </div> -->
+                    <div class="prefix-box bg-dark text-tertiary">
+                        <b class="self-center">Rp.</b>
+                    </div>
+                    <ion-item class="ion-no-padding">
+                        <ion-input type="number" [(ngModel)]="data[selectedItemIdx].price" [disabled]="isViewMode"
+                            class="global-text-title text-right" style="margin-left:0.25rem"></ion-input>
+                            <!-- <InputNumber [precision]="precision" [amount]="data[selectedItemIdx].price" (amountEntered)="amountChanged($event)"></InputNumber> -->
+                        <!-- <InputNumber [precision]="precision" [amount]="''" (amountEntered)="data[selectedItemIdx].price = $event"></InputNumber> -->
+                    </ion-item>
+                </div>
+                <div class="flex flex-row" style="margin-bottom: 20px; justify-content: space-between;">
+                    <strong class="center-self">
+                        Supplier
+                    </strong>
+                    <div style="align-self:center;">{{data[selectedItemIdx].supplier}}</div>
+                </div>
+                <div style="margin-bottom: 20px;">
+                    <span class="textcolor-dark">
+                        <strong>Qty</strong>
+                        <span *ngIf="true" style="color:red">&nbsp;*</span>
+                    </span>
+                    <ion-item style="margin-bottom: 10px;" class="ion-no-padding">
+                        <ion-input type="number" [(ngModel)]="data[selectedItemIdx].qty" [disabled]="isViewMode"
+                            class="global-text-title"></ion-input>
+                        {{data[selectedItemIdx].material_unit}}
+                    </ion-item>
+                    <p ion-text color="danger" class="text08"
+                        *ngIf="errorMsg[selectedItemIdx] && errorMsg[selectedItemIdx].qty">
+                        <ion-text color="danger">
+                            {{errorMsg[selectedItemIdx].qty}}
+                        </ion-text>
+                    </p>
+                </div>
+                <div style="margin-bottom: 20px;">
+                    <span class="textcolor-dark"><strong>Info</strong></span>
+                    <ion-item style="margin-bottom: 10px;" class="ion-no-padding">
+                        <ion-input type="text" [(ngModel)]="data[selectedItemIdx].info" [disabled]="isViewMode">
+                        </ion-input>
+                    </ion-item>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="input-item-navigator">
+        <div style="width:85%">
+            <p style="color:white">Material Diterima {{date | date:'dd MMM yyyy'}}</p>
+        </div>
+        <div class="flex flex-row" style="width:15%; justify-content: space-between;">
+            <ion-icon name="search-sharp" 
+                [ngStyle]="
+                {
+                    'color': showQuickNav ? 'var(--ion-color-tertiary)' : 'white',
+                    'zoom' : 1.25
+                }"
+                (click)="showQuickNav = !showQuickNav">
+            </ion-icon>
+            <ion-icon [name]="!expandNavigator ? 'chevron-up-sharp' : 'chevron-down-sharp'"
+                style="color:var(--ion-color-tertiary); zoom:1.25" (click)="expandNavigator = !expandNavigator">
+            </ion-icon>
+        </div>
+    </div>
+    <div *ngIf="data && data.length > 0" [ngStyle]="
+        {
+            'height': !expandNavigator ? '35%' : '95%',
+            'position': 'relative',
+            'overflow-y': 'scroll'
+        }
+    ">
+        <div style="
+            position: absolute;
+            width: 100%;
+        ">
+            <ion-toolbar mode="md" color="dark" style="padding: 0 1rem 0 1rem;" *ngIf="showQuickNav">
+                <ionic-selectable #quickNavSelection [items]="data" itemValueField="thm_id"
+                    itemTextField="material_name" [canSearch]="true" (onChange)="quickNavigation($event)"
+                    placeholder="*Click Untuk Tampilkan Semua Task">
+                    <ng-template ionicSelectableTitleTemplate>*Click Untuk Tampilkan Semua Task</ng-template>
+                    <ng-template ionicSelectableItemTemplate let-item="item">
+                        <p class="text-ellipsis">
+                            {{item.material_name}}
+                            <br>
+                            -------
+                            <br>
+                            {{item.task_parent}}
+                            <br>
+                            {{item.task_name}}
+                        </p>
+                    </ng-template>
+                </ionic-selectable>
+            </ion-toolbar>
+            <ion-item *ngFor="let item of data; let idx = index" [ngStyle]="
+                {
+                    'padding': '5px 0px 0px 0px',
+                    'min-height' : '50px',
+                    'background-color': selectedItemIdx === idx ? 'var(--ion-color-tertiary)' : 
+                    !data[idx].qty  ? 'grey' : ''
+                }
+                " (click)="changeselectedItem(idx)">
+                <div style="width: 95%; display: flex; flex-direction: row;">
+                    <div style="width: 5%; align-self: center;">
+                        {{idx + 1}}.
+                    </div>
+                    <div style="display: flex; flex-direction: column; width: 90%">
+                        <b>{{item.material_name ? item.material_name : '-'}}</b>
+                        <div>{{item.task_parent ? item.task_parent : '-'}}</div>
+                        <div>{{item.task_name ? item.task_name : '-'}}</div>
+                    </div>
+                </div>
+                <div style="width: 5%;">
+                    <ion-icon *ngIf="!item.readonly" name="close" style="color:maroon; zoom: 1.1"
+                        (click)="deleteData(idx, item.id); app.setDirty(); preventDuplicate();"></ion-icon>
+                </div>
+            </ion-item>
+        </div>
+    </div>
+</ion-content>

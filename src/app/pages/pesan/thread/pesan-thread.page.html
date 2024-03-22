@@ -1,0 +1,79 @@
+<HeaderGlobal [props]="props" (event)="eventHandler($event)"></HeaderGlobal>
+
+<ion-content>
+  <ion-refresher slot="fixed" (ionRefresh)="ionRefresh($event)" (ionPull)="app.ionPull($event)"
+    (ionStart)="app.ionStart($event)">
+    <ion-refresher-content pullingIcon="arrow-dropdown" pullingText="Pull to refresh" refreshingSpinner="circles"
+      refreshingText="Refreshing...">
+    </ion-refresher-content>
+  </ion-refresher>
+  <div *ngIf="pesan">
+    <ion-item class="bg-white">
+      <ion-grid class="grid-custom card">
+        <ion-row>
+          <div class="global-text-title" style="padding: 0.75rem 0 0.5rem 0"><strong>{{pesan.topic}}</strong>&nbsp;
+            <ion-icon [name]="pesan.status === 'Closed' && 'lock-closed-outline'"></ion-icon>
+          </div>
+        </ion-row>
+        <div class="hr"></div>
+        <ion-row class="global-text-regular">{{pesan.project_name}}</ion-row>
+        <ion-row class="global-text-little-detail">
+          <ion-icon name="chatbubble-ellipses-outline"></ion-icon>&nbsp;{{pesan.ticket}}
+        </ion-row>
+        <ion-row class="global-text-regular" style="margin-top: 10px;">{{pesan.parent_task}}</ion-row>
+        <ion-row class="global-text-regular" style="margin-top:-10px; margin-bottom: 5px;">{{pesan.task_name}}</ion-row>
+        <ion-row class="global-text-little-detail">
+          <ion-col size=6 style="text-align: left;">
+            <ion-icon name="person"></ion-icon>&nbsp;{{pesan.username}}
+          </ion-col>
+          <ion-col size=6 style="text-align: right;">
+            {{ alpro.dateFormat(pesan.created_time) }}
+          </ion-col>
+        </ion-row>
+      </ion-grid>
+    </ion-item>
+    <ion-virtual-scroll [items]="replies" approxItemHeight="320px" class="reply-card">
+      <ion-item *virtualItem="let item; let itemBounds = bounds;"
+        (click)="item.attachments ? presentAttachments(item.attachments) : ''">
+        <ion-grid>
+          <ion-row>
+            <ion-col size=3 class="ion-align-self-start">
+              <ion-avatar>
+                <img [src]="item.profile_picture ? item.profile_picture : 'assets/img/avatar.png'">
+              </ion-avatar>
+            </ion-col>
+            <ion-col size=9>
+              <div>
+                <b>{{ item.name ? item.name : 'Anonymous' }}</b>&nbsp;
+                <span style="text-align: right; font-size: 12px; color:grey">{{item.p_user == auth.user.userid ? '(You)' : '' }}</span>
+              </div>
+              <div>
+                <button class="btn-role"
+                  [ngStyle]="item.role == 2 ? {'background-color': 'var(--ion-color-secondary)'} : item.role == 3 ? {'background-color':'#4CAF50'} : {'background-color':'var(--ion-color-tertiary)'} ">
+                  {{ item.position ? item.position : 'Unassigned'}}
+                </button>
+              </div>
+            </ion-col>
+          </ion-row>
+          <ion-row style="color:black; margin: 10px;">
+            <div class="pesan-recipient" [innerHTML]="item.content"></div>
+          </ion-row>
+          <ion-row style="margin-left:10px">
+            <div class="pesan-time" style="color:grey">
+              {{ alpro.dateFormat(item.created_time) }}
+            </div>
+          </ion-row>
+          <ion-row *ngIf="item.attachments" class="global-text-little-detail" style="color:black; margin-left:10px">
+            <ion-icon name="attach"></ion-icon>
+            &nbsp;Attachments ( {{item.attachments.length}} )
+          </ion-row>
+        </ion-grid>
+      </ion-item>
+    </ion-virtual-scroll>
+  </div>
+</ion-content>
+
+<ion-footer>
+  <Options *ngIf="props.options && props.options.enable" [props]="props.options" (event)="eventHandler($event)">
+  </Options>
+</ion-footer>

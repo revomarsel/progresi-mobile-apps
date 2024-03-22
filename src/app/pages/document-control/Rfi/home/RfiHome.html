@@ -1,0 +1,131 @@
+<HeaderGlobal [props]="props"></HeaderGlobal>
+<ion-toolbar *ngIf="props.search.enable" color="dark">
+  <ion-searchbar
+    slot="start"
+    [(ngModel)]="searchKey"
+    (ionChange)="searchValue()"
+    (ionClear)="cancelSearch()"
+    showCancelButton="focus"
+    animated
+  ></ion-searchbar>
+</ion-toolbar>
+<Filter
+  *ngIf="props.filter.enable"
+  [props]="props.filter"
+  (event)="eventHandler($event,'filter')"
+></Filter>
+<Tabs
+  *ngIf="props.tabs.enable"
+  [props]="props.tabs"
+  (event)="eventHandler($event,'fitur')"
+></Tabs>
+<!-- NOTES
+    Input tag ada di InputFieldTrouble.ts -> http://localhost:8100/input-field-trouble/99 
+    https://github.com/TeamHive/rich-text-editor -> html text editor
+    https://www.tiny.cloud/docs/integrations/angular/ -> html text editor
+    http://localhost:8100/pesan_form/create -> foto
+    <ion-input type="file" [(ngModel)]="data.file" [disabled]="isViewMode"> -> upload file
+-->
+<ion-content class="bg-white">
+  <ion-refresher
+    [disabled]="props.virtualScrollOptions.disablePullToRefresh"
+    slot="fixed"
+    (ionRefresh)="ionRefresh($event)"
+    (ionPull)="app.ionPull($event)"
+    (ionStart)="app.ionStart($event)"
+  >
+    <ion-refresher-content
+      pullingIcon="arrow-dropdown"
+      pullingText="Pull to refresh"
+      refreshingSpinner="circles"
+      refreshingText="Refreshing..."
+    >
+    </ion-refresher-content>
+  </ion-refresher>
+  <div class="center-item bg-white">
+    <ion-spinner
+      [hidden]="isDataEmpty || (data && data.length > 0)"
+      name="dots"
+    ></ion-spinner>
+    <div *ngIf="isDataEmpty && (data && data.length < 1)">-- NO DATA --</div>
+  </div>
+  <ion-card class="bg-white m-2" *ngFor="let item of data; let idx = index;">
+    <div
+      class="bgCard"
+      [ngStyle]="{'background-image':'linear-gradient(100deg, #000000d6 0%, #00000054 110%),url('+fileUrl(item.proyek_image)+')'}"
+    >
+      <div class="titleCardRight w-100">
+        <span
+          *ngIf="item.doc_overdue > 0"
+          class="badge badge-warning float-left ml-2 pt-1"
+        >
+          Lewat Deadline ! <span class="pl-1">{{item.doc_overdue}} Hari</span>
+        </span>
+        <span
+          class="badge badge-{{item.doc_status == 'Open' ? 'success' : 'danger'}}"
+        >
+          <ion-icon name="checkmark-outline"></ion-icon> {{item.doc_status}}
+        </span>
+      </div>
+      <div class="w-100 baseTitleCard">
+        <b class="titleCard"> {{item.proyek_name}} </b>
+      </div>
+    </div>
+    <ion-card-content class="px-2 pt-2 pb-0">
+      <table style="text-transform: capitalize">
+        <tbody>
+          <tr>
+            <td class="w-15">Judul</td>
+            <td class="w-5 px-1">:</td>
+            <td>{{item.doc_title}}</td>
+          </tr>
+          <tr>
+            <td>Diajukan</td>
+            <td class="w-5 px-1">:</td>
+            <td>{{item.doc_created_by}}</td>
+          </tr>
+          <tr>
+            <td>Deadline</td>
+            <td class="w-5 px-1">:</td>
+            <td>
+              <b class="text-danger"> {{item.doc_due_date}}</b>
+            </td>
+          </tr>
+          <tr *ngIf="item.doc_status == 'Draft'">
+            <td>Action</td>
+            <td class="w-5 px-1">:</td>
+            <td>
+              <a ngUrl="*"
+                ><ion-icon name="save-outline"></ion-icon> Update Draft
+              </a>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </ion-card-content>
+
+    <ion-footer>
+      <ion-row>
+        <ion-col>
+          <button
+            ion-button
+            (click)="detailDocumentControl(item.doc_id)"
+            class="btn btn-primary w-100 p-1"
+          >
+            <ion-icon name="document-outline"></ion-icon> Detail
+          </button>
+        </ion-col>
+        <ion-col>
+          <button
+            ion-button
+            (click)="app.downloadFile(fileUrl(item.doc_url))"
+            class="btn btn-warning w-100 p-1"
+          >
+            <ion-icon name="cloud-download-outline"></ion-icon> Unduh File
+            Master
+          </button>
+        </ion-col>
+      </ion-row>
+    </ion-footer>
+  </ion-card>
+</ion-content>

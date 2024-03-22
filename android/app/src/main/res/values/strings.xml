@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Progresi</string>
+    <string name="title_activity_main">Progresi</string>
+    <string name="package_name">com.kdi.progresi</string>
+    <string name="custom_url_scheme">com.kdi.progresi</string>
+</resources>

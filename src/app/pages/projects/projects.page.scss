@@ -1,0 +1,27 @@
+.projects-title{
+    font-size:20px;
+    padding-top: 8px;
+    padding-right: 10px;
+    padding-left: 10px;
+  }
+
+.projects-content{
+    font-size:16px;
+    padding-top: 5px;
+    padding-right: 5px;
+    padding-bottom: 5px;
+    white-space: normal;
+    color: black;
+
+      .button{
+        display: block;
+        margin: 0 auto;
+      }
+}
+
+ion-item { 
+  --border-color: white !important;
+  --border-style: 0;
+  margin:5px auto;
+  --ion-item-background: transparent;
+}

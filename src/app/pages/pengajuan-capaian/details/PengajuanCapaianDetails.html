@@ -1,0 +1,138 @@
+<HeaderGlobal [props]="props" (event)="eventHandler($event)"></HeaderGlobal>
+<ion-toolbar *ngIf="props.search.enable" color="dark">
+  <ion-searchbar
+    slot="start"
+    [(ngModel)]="searchKey"
+    (ionChange)="searchValue()"
+    (ionClear)="cancelSearch()"
+    showCancelButton="focus"
+    animated
+  ></ion-searchbar>
+</ion-toolbar>
+
+<ion-content>
+  <div class="center-item">
+    <ion-spinner
+      [hidden]="isDataEmpty || (data && data.length > 0)"
+      name="dots"
+    ></ion-spinner>
+    <div *ngIf="isDataEmpty && (data && data.length < 1)">-- NO DATA --</div>
+  </div>
+  <!-- input -->
+  <ion-card
+    *ngIf="is_draft && roleName === 'superadmin.' || !is_draft && roleName === 'projectadmin.' || !is_draft && roleName === 'projectmanager.'"
+    (click)="addData()"
+    [hidden]="isViewOnly"
+  >
+    <ion-card-content style="padding: 0.75rem">
+      <div class="flex flex-col" style="align-items: center">
+        <ion-icon class="expander" name="add-outline" size="large"></ion-icon>
+        <span class="global-text-little-detail">
+          {{ !data || data.length < 1 ? 'empty data, add data now' : 'add data'
+          }}
+        </span>
+      </div>
+    </ion-card-content>
+  </ion-card>
+  <!-- list -->
+  <ion-card *ngFor="let item of dataView; let idx = index">
+    <div class="flex flex-col w-full p-4">
+      <div
+        class="flex flex-row justify-between py-2"
+        style="border-bottom: 1px solid #ececeb"
+      >
+        <div class="flex flex-row">
+          <div class="flex flex-col px-2" (click)="uploadImage(idx,'before')">
+            <div class="flex flex-row justify-center text-primary">
+              {{item.files?.data?.length ? item.files?.data?.length :
+              '-'}}&nbsp;
+              <ion-icon name="image" class="zoom-1"></ion-icon>
+            </div>
+            <span class="global-text-little-detail">Foto</span>
+          </div>
+        </div>
+        <div
+          class="self-center zoom-1 w-quarter"
+          *ngIf="item.is_status === 'submitted' && roleName === 'projectowner.'"
+        >
+          <div
+            (click)="postData('approved', item.id)"
+            class="flex flex-row justify-around"
+          >
+            <ion-icon name="checkmark-outline" class="text-warning"></ion-icon>
+            <span class="global-text-little-detail text-warning text08">
+              {{" "}} Approve</span
+            >
+            <!-- <ion-icon name="trash" class="text-danger zoom-1" (click)="deleteData(idx, item.id)"></ion-icon> -->
+          </div>
+        </div>
+        <div
+          class="self-center zoom-1"
+          style="width: 35%"
+          *ngIf="item.is_status === 'submitted' && roleName !== 'projectowner.' || item.is_status !== 'submitted'"
+        >
+          <div class="flex flex-row justify-around">
+            <span
+              class="global-text-little-detail {{ item.is_status === 'approved' ? 'text-success' : 'text-primary'}} text08"
+              style="text-transform: capitalize"
+            >
+              <ion-icon
+                *ngIf="item.is_status === 'approved'"
+                name="checkmark-outline"
+                class="text-success"
+              ></ion-icon>
+              {{item.is_status === 'approved' ? (item.approved_time | date:'dd
+              MMM yyyy') : item.is_status}}</span
+            >
+          </div>
+        </div>
+      </div>
+      <div class="p-2 flex flex-col">
+        <div class="flex flex-col py-2">
+          <span class="font-bold global-text-regular text-primary">
+            {{item.parent_name}}
+          </span>
+          <span class="font-bold global-text-desc"> {{item.task_name}} </span>
+        </div>
+        <div class="flex flex-row justify-between py-2">
+          <span>Volume</span>
+          <span><b>{{item.volume}}</b> {{item.unit}}</span>
+        </div>
+        <div class="flex flex-row justify-between py-2">
+          <span>Harga Satuan</span>
+          <b>{{item.harga_satuan | currency:"Rp.":true:"1.0"}}</b>
+        </div>
+        <div class="flex flex-row justify-between py-2">
+          <span>Total Capaian Sebelumnya</span>
+          <span><b>{{item.prev_cum}}</b> {{item.unit}}</span>
+        </div>
+        <div class="flex flex-row justify-between py-2">
+          <span class="self-center w-thirdquarter">Capaian Hari ini</span>
+          <ion-item>
+            <ion-input
+              type="number"
+              [(ngModel)]="item.submitted_capaian"
+              [disabled]="isViewMode"
+              class="global-text-title font-bold"
+            ></ion-input>
+            {{item.unit}}
+          </ion-item>
+        </div>
+        <div class="flex flex-row justify-between py-2">
+          <span>Total Harga</span>
+          <b
+            >{{item.harga_satuan * item.submitted_capaian |
+            currency:"Rp.":true:"1.0"}}</b
+          >
+        </div>
+        <div class="flex flex-row justify-between py-2">
+          <span>Total Capaian saat ini</span>
+          <b
+            >{{item.now_cum === 0 ? 'Menunggu Approve' : item.now_cum === null ?
+            0 : ((item.now_cum/item.now_bobot | number:'0.0-2')+'%')}}</b
+          >
+        </div>
+      </div>
+    </div>
+  </ion-card>
+</ion-content>

@@ -1,0 +1,170 @@
+<HeaderGlobal [props]="props" (event)="eventHandler($event)"></HeaderGlobal>
+
+<ion-content>
+    <div *ngIf="!expandNavigator" style="
+        height: 60%;
+        overflow-y: scroll;
+        position: relative;
+    ">
+        <div style="
+            position:absolute; 
+            background-color: white;
+            width: 100%;
+        ">
+            <div *ngIf="data && data.length > 0">
+                <div style="
+                position: absolute;
+                width: 100%;
+            ">
+                    <ion-item *ngFor="let item of data[selectedItemIdx].material_list; let idx = index" [ngStyle]="
+                    {
+                        'padding': '5px 0px 0px 0px',
+                        'min-height' : '50px',
+                        'background' : 'white'
+                    }
+                    ">
+                        <div class="flex flex-row" style="justify-content: space-evenly;">
+                            <div style="width: 5%; align-self: center;">
+                                {{idx + 1}}.
+                            </div>
+                            <div style="display: flex; flex-direction: column; width: 55%; align-self:center;">
+                                <div class="global-text-title">
+                                    <b>{{item.material_name ? item.material_name : '-'}}</b>
+                                </div>
+                                <div class="flex flex-col" style="margin-bottom: 10px;">
+                                    <div class="flex flex-row w-full" style="padding-bottom: 0.2rem">
+                                        <div class="prefix-box bg-dark text-tertiary">
+                                            <b class="self-center">Rp.</b>
+                                        </div>
+                                        <ion-item class="ion-no-padding">
+                                            <ion-input type="number" [(ngModel)]="item.price" [disabled]="isViewMode"
+                                                class="global-text-title text-right" style="margin-left:0.25rem">
+                                            </ion-input>
+                                            / {{item.unit ? item.unit : 'unit'}}
+                                        </ion-item>
+                                    </div>
+
+                                    <span class="global-text-little-detail">Harga Satuan</span>
+                                </div>
+                                <div class="flex flex-col" style="margin-bottom: 10px;">
+                                    <span>{{item.price * item.qty | currency:"Rp. ":true:"1.0"}}</span>
+                                    <span class="global-text-little-detail">Harga Total</span>
+                                </div>
+                            </div>
+                            <div class="flex flex-col" style="
+                                    width:40%; 
+                                    padding-left: 10px;
+                                ">
+                                <div class="flex flex-row"
+                                    style="align-items: center; margin-bottom: 20px; font-weight: 800;">
+                                    <span>Qty</span>
+                                    <ion-item>
+                                        <ion-input type="number" [(ngModel)]="item.qty" [disabled]="isViewMode"
+                                            class="global-text-title" style="text-align: right;"
+                                            (change)="app.setDirty()">
+                                        </ion-input>
+                                    </ion-item>
+                                </div>
+                                <div class="flex flex-row" style="
+                                    align-items: center; 
+                                    margin-bottom: 20px; 
+                                    justify-content: space-between;
+                                    padding-right: 20px;
+                                ">
+                                    <span>Max.</span>
+                                    <span>{{item.max_use}}</span>
+                                </div>
+                                <div class="flex flex-row" style="
+                                    align-items: center; 
+                                    margin-bottom: 20px; 
+                                    justify-content: space-between;
+                                    padding-right: 20px;
+                                ">
+                                    <span>Sisa</span>
+                                    <span>{{item.max_use - item.qty | number:'0.0-2' }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </ion-item>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="input-item-navigator">
+        <div style="width:85%">
+            <p style="color:white">Material Digunakan {{date | date:'dd MMM yyyy'}}</p>
+        </div>
+        <div class="flex flex-row" style="width:15%; justify-content: space-between;">
+            <ion-icon name="search-sharp" [ngStyle]="
+                {
+                    'color': showQuickNav ? 'var(--ion-color-tertiary)' : 'white',
+                    'zoom' : 1.25
+                }" (click)="showQuickNav = !showQuickNav">
+            </ion-icon>
+            <ion-icon [name]="!expandNavigator ? 'chevron-up-sharp' : 'chevron-down-sharp'"
+                style="color:var(--ion-color-tertiary); zoom:1.25" (click)="expandNavigator = !expandNavigator">
+            </ion-icon>
+        </div>
+    </div>
+    <div *ngIf="data && data.length > 0" [ngStyle]="
+        {
+            'height': !expandNavigator ? '35%' : '95%',
+            'position': 'relative',
+            'overflow-y': 'scroll'
+        }
+    ">
+        <div style="
+            position: absolute;
+            width: 100%;
+        ">
+            <ion-toolbar mode="md" color="dark" style="padding: 0 1rem 0 1rem;" *ngIf="showQuickNav">
+                <ionic-selectable #quickNavSelection [items]="data" itemValueField="the_id"
+                    itemTextField="material_name" [canSearch]="true" (onChange)="quickNavigation($event)"
+                    placeholder="*Click Untuk Tampilkan Semua Task">
+                    <ng-template ionicSelectableTitleTemplate>*Click Untuk Tampilkan Semua Task</ng-template>
+                    <ng-template ionicSelectableItemTemplate let-item="item">
+                        <p class="text-ellipsis">
+                            {{item.material_name}}
+                            <br>
+                            -------
+                            <br>
+                            {{item.task_parent}}
+                            <br>
+                            {{item.task_name}}
+                        </p>
+                    </ng-template>
+                </ionic-selectable>
+            </ion-toolbar>
+            <ion-item *ngFor="let item of data; let idx = index" [ngStyle]="
+                {
+                    'padding': '5px 0px 0px 0px',
+                    'min-height' : '50px',
+                    'background-color': selectedItemIdx === idx ? 'var(--ion-color-tertiary)' : ''
+                }
+                " (click)="changeselectedItem(idx)">
+                <div class="flex flex-row" style="width: 100%;">
+                    <div style="width: 5%; align-self: center;">
+                        {{idx + 1}}.
+                    </div>
+                    <div style="width: 95%; display: flex; flex-direction: column;">
+                        <b>{{item.task_parent ? item.task_parent : '-'}}</b>
+                        <div style="margin-bottom:0.5rem;">{{item.task_name ? item.task_name : '-'}}</div>
+                        <div class="flex flex-col" style="margin-bottom:0.5rem;">
+                            <div class="flex flex-row justify-between">
+                                <div>Capaian Hari ini</div>
+                                <div><strong>{{ item.volume }}</strong> {{ item.unit }}</div>
+                            </div>
+                            <div class="flex flex-row justify-between">
+                                <div>Capaian Hingga Hari ini</div>
+                                <div>
+                                    <strong>{{ item.volume_till_now }}</strong> 
+                                    {{ item.unit }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </ion-item>
+        </div>
+    </div>
+</ion-content>

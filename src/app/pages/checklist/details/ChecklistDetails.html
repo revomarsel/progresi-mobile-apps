@@ -1,0 +1,205 @@
+<HeaderGlobal [props]="props" (event)="eventHandler($event)"></HeaderGlobal>
+<ion-toolbar *ngIf="props.search.enable" color="dark">
+  <ion-searchbar
+    slot="start"
+    [(ngModel)]="searchKey"
+    (ionChange)="searchValue()"
+    (ionClear)="cancelSearch()"
+    showCancelButton="focus"
+    animated
+  ></ion-searchbar>
+</ion-toolbar>
+<ion-toolbar color="dark" *ngIf="data">
+  <div class="flex flex-col global-text-desc p-2">
+    <span class="font-bold text-tertiary">{{ parentTask }}</span>
+    <span class="text-white">{{ taskName }}</span>
+  </div>
+</ion-toolbar>
+
+<ion-content>
+  <!-- <ion-refresher
+    slot="fixed"
+    (ionRefresh)="ionRefresh($event)"
+    (ionPull)="app.ionPull($event)"
+    (ionStart)="app.ionStart($event)"
+  >
+    <ion-refresher-content
+      pullingIcon="arrow-dropdown"
+      pullingText="Pull to refresh"
+      refreshingSpinner="circles"
+      refreshingText="Refreshing..."
+    >
+    </ion-refresher-content>
+  </ion-refresher> -->
+  <div class="center-item">
+    <ion-spinner
+      [hidden]="isDataEmpty || (data && data.length > 0)"
+      name="dots"
+    ></ion-spinner>
+    <div *ngIf="isDataEmpty && (data && data.length < 1)">-- NO DATA --</div>
+  </div>
+  <!-- input -->
+  <div *ngIf="app.auth.user.UserRoles[0].id === 8">
+    <ion-card (click)="addData()" [hidden]="isViewOnly">
+      <ion-card-content style="padding: 0.75rem">
+        <div class="flex flex-col" style="align-items: center">
+          <ion-icon class="expander" name="add-outline" size="large"></ion-icon>
+          <span class="global-text-little-detail">
+            {{ !data || data.length < 1 ? 'empty data, add data now' : 'add data'
+            }}
+          </span>
+        </div>
+      </ion-card-content>
+    </ion-card>
+  </div>
+  <!-- list -->
+  <ion-card *ngFor="let item of dataView; let idx = index">
+    <div class="flex flex-col w-full p-4">
+      <div
+        class="flex flex-row justify-between py-2"
+        style="border-bottom: 1px solid #ececeb"
+      >
+        <div class="flex flex-row">
+          <div class="flex flex-col px-2" (click)="uploadImage(idx,'before')">
+            <div class="flex flex-row justify-center text-primary">
+              {{item.files_before.data.length}}&nbsp;
+              <ion-icon name="image" class="zoom-1"></ion-icon>
+            </div>
+            <span class="global-text-little-detail">Sebelum</span>
+          </div>
+          <div class="flex flex-col px-2" (click)="uploadImage(idx,'after')">
+            <div class="flex flex-row justify-center text-primary">
+              {{item.files_after.data.length}}&nbsp;
+              <ion-icon name="image" class="zoom-1"></ion-icon>
+            </div>
+            <span class="global-text-little-detail">Sesudah</span>
+          </div>
+          <div class="flex flex-col px-2" (click)="showHistory(item.id)">
+            <div class="flex flex-row justify-center text-primary">
+              <ion-icon name="timer-outline" class="zoom-1"></ion-icon>
+            </div>
+            <span class="global-text-little-detail">History</span>
+          </div>
+        </div>
+        <div
+          class="self-center zoom-1 text-danger"
+          (click)="deleteData(idx, item.id)"
+        >
+          <ion-icon name="trash"></ion-icon>
+        </div>
+      </div>
+      <ion-item>
+        <ion-label position="floating">
+          <span class="text-primary">Item</span>
+        </ion-label>
+        <ion-input type="text" [(ngModel)]="item.item" [readonly]="isViewMode">
+        </ion-input>
+      </ion-item>
+      <ion-item>
+        <ion-label position="floating">
+          <span class="text-primary">Deskripsi</span>
+        </ion-label>
+        <ion-input
+          type="text"
+          [(ngModel)]="item.deskripsi"
+          [readonly]="isViewMode"
+        >
+        </ion-input>
+      </ion-item>
+      <ion-item>
+        <ion-label position="floating">
+          <span class="text-primary">Deadline</span>
+        </ion-label>
+        <ion-input type="date" placeholder="" [(ngModel)]="item.due_date" [readonly]="isViewMode">
+        </ion-input>
+      </ion-item>
+      <span class="text-right py-2 font-bold"
+        >{{item.created_time | date:'dd MMM yyyy'}}</span
+      >
+    </div>
+    <div class="flex flex-row w-full bg-tertiary justify-between global-text-desc">
+      <div class="text-dark font-bold text-center w-half py-1">Owner</div>
+      <div class="text-dark font-bold text-center w-half py-1">Admin</div>
+    </div>
+    <div class="flex flex-row w-full bg-primary justify-between">
+      <div
+        (click)="app.auth.user.UserRoles[0].id === 8 && !isViewOnly && (doCheck('owner', idx))"
+        [ngClass]="(item.is_checked_owner === 'Y' ? 'bg-green' : 'bg-dark') + ' text-white text-center w-half py-2'"
+      >
+        <div>
+          <ion-icon
+            [name]="item.is_checked_owner === 'Y' ? 'checkmark-outline' : 'close'"
+            class="zoom-1"
+          ></ion-icon>
+        </div>
+        <div class="global-text-desc">
+          <span
+            >{{item.is_checked_owner === 'Y' ? (!item.checked_time_owner ?
+            'Checked' : item.checked_time_owner | date:'dd MMM yyyy') : 'Belum
+            di check'}}</span
+          >
+        </div>
+      </div>
+      <div
+        (click)="app.auth.user.UserRoles[0].id !== 8 && !isViewOnly && (doCheck('admin', idx))"
+        [ngClass]="(item.is_checked_admin === 'Y' ? 'bg-green' : 'bg-dark') + ' text-white text-center w-half py-2'"
+      >
+        <div>
+          <ion-icon
+            [name]="item.is_checked_admin === 'Y' ? 'checkmark-outline' : 'close'"
+            class="zoom-1"
+          ></ion-icon>
+        </div>
+        <div>
+          <span
+            >{{item.is_checked_admin === 'Y' ? (!item.checked_time_admin ?
+            'Checked' : item.checked_time_admin | date:'dd MMM yyyy') : 'Belum
+            di check'}}</span
+          >
+        </div>
+      </div>
+    </div>
+    <!-- <div class="flex flex-row w-full justify-between">
+      <div class="flex flex-col" style="width: 80%">
+        <span class="global-text-regular font-bold text-primary"
+          >{{item.parent}}</span
+        >
+        <span class="global-text-desc">{{item.name}}</span>
+      </div>
+      <div class="flex flex-row text-primary" (click)="goToDetails(item.id)">
+        <ion-icon name="pencil"></ion-icon>
+        <span class="global-text-little-detail text-primary">&nbsp;Edit</span>
+      </div>
+    </div>
+    <div class="flex flex-col w-full py-2">
+      <span class="global-text-desc font-bold text-dark"
+        >{{item.created_time | date:'dd MMM yyyy'}}</span
+      >
+      <span class="global-text-desc">{{item.user}}</span>
+    </div>
+    <div class="flex flex-col w-full py-2 bg-light" style="border-radius: 10px">
+      <div class="flex flex-row w-full justify-between p-1">
+        <div class="flex flex-col w-third items-center">
+          <span class="global-text-regular text-primary font-bold"
+            >{{item.total_item}}</span
+          >
+          <span class="global-text-little-detail">Item</span>
+        </div>
+        <div class="flex flex-col w-third items-center text-center">
+          <span class="global-text-regular text-primary font-bold"
+            >{{item.checked_by_admin}}</span
+          >
+          <span class="global-text-little-detail"
+            >Persetujuan<br />Kontraktor</span
+          >
+        </div>
+        <div class="flex flex-col w-third items-center text-center">
+          <span class="global-text-regular text-primary font-bold"
+            >{{item.checked_by_owner}}</span
+          >
+          <span class="global-text-little-detail">Persetujuan<br />Owner</span>
+        </div>
+      </div>
+    </div> -->
+  </ion-card>
+</ion-content>

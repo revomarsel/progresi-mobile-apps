@@ -1,0 +1,59 @@
+<HeaderGlobal [props]="props"></HeaderGlobal>
+
+<ion-content class="bg-white border-radius">
+  <ion-card *ngFor="let item of data; let idx = index" class="m-3">
+    <div class="box box-down cyan">
+      <div class="flex flex-row">
+        <div class="text-left">
+          <img
+            style="width: 100%; height: auto; max-width: 70px"
+            class="img-fluid"
+            [src]="image"
+          />
+        </div>
+        <div class="pl-3">
+          <h4 class="mb-1 mt-2">{{item.title}}</h4>
+          <!-- <p>Request for information (RFI) adalah dokumen penyaringan untuk mengumpulkan informasi vendor dan mempersempit daftar vendor potensial.</p> -->
+          <p class="margin-0">
+            Keseluruhan : <b>{{item.data.totalAll}} Dokumen</b>
+          </p>
+        </div>
+      </div>
+
+      <div *ngFor="let sub_1 of item.data.list">
+        <h5 class="mb-1 text-capitalize">
+          <span class="font-size-16">{{sub_1.title}}</span>
+          <b class="ml-2">Total : {{sub_1.total}}</b>
+        </h5>
+        <div *ngFor="let sub of sub_1.data">
+          <div
+            class="progress-bar {{ sub.title == 'submitted' ? 'bg-primary' : ( sub.title == 'close' ? 'bg-danger' : 'bg-success') }} text-center mb-2 text-capitalize"
+            style="width: 50%"
+          >
+            {{sub.total}} {{sub.title}}
+          </div>
+        </div>
+      </div>
+      <div>
+        <h5 style="margin-bottom: 5px; text-transform: capitalize">Draft</h5>
+        <div class="progress" style="margin-bottom: 10px">
+          <div class="progress-bar bg-primary text-center mb-3 w-100">
+            {{item.data.draft}} Dokumen
+          </div>
+        </div>
+      </div>
+
+      <div class="text-right mt-3 w-100">
+        <!-- <button
+          
+          class="link py-2 px-3"
+        >
+          
+        </button> -->
+        <a ion-button (click)="detailDocumentControl(item.type)">
+          <b>List Semua Data</b>
+        </a>
+      </div>
+    </div>
+  </ion-card>
+</ion-content>

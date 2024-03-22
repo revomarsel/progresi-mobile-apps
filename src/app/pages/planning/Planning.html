@@ -1,0 +1,129 @@
+<HeaderGlobal [props]="props" (event)="eventHandler($event)"></HeaderGlobal>
+<ion-toolbar class="ion-no-padding">
+  <div class="global-text-regular"
+    style="background:var(--ion-color-tertiary); color:black; padding: 0.35rem; text-align: center;">
+  </div>
+  <div style="background: linear-gradient(180deg, var(--ion-color-tertiary) 50%, white 50%);">
+    <div class="flex flex-row justify-around" style="
+      padding: 0.5rem 0.25rem 0.5rem 0.25rem; 
+      background:var(--ion-color-dark); 
+      width: 80%;
+      margin: 0 auto;
+      border-radius: 1rem;">
+      <div class="keypad-button-inner highlight" *ngFor="let item of navs" style="
+        color: white;
+      " (click)="navCtrl.navigateForward(item.url)">
+        <ion-icon slot="icon-only" [name]="item.icon" size=large></ion-icon>
+        <ion-label style="margin-top: 5px; text-align: center; max-width: 80%;">{{item.name}}</ion-label>
+      </div>
+    </div>
+  </div>
+  <div class="flex flex-row w-full justify-center" [ngStyle]="{
+    'padding':'0.5rem',
+    'color': true ? 'green' : 'grey'
+  }" (click)="showBaseline()">
+    <ion-icon [name]="baselineShow ? 'chevron-up' : 'chevron-down'"></ion-icon>&nbsp;
+    {{baseline && baseline.name}} {{true ? 'Aktif' : 'Non-Aktif'}}&nbsp;
+    <ion-icon [name]="true ? 'checkmark' : 'close'"></ion-icon>
+  </div>
+</ion-toolbar>
+<div *ngIf="baselineShow">
+  <ion-segment scrollable class="segment-light" style="border-radius: 0px;">
+    <ion-segment-button *ngFor="let item of baselineList" class="segment-btn-light" [ngStyle]="{
+      'color':baseline.id === item.id ? 'var(--ion-color-tertiary)' : 'var(--ion-color-dark)'
+    }" (click)="item.func()">
+      {{item.text}}
+    </ion-segment-button>
+  </ion-segment>
+</div>
+<ion-toolbar *ngIf="props.search.enable">
+  <ion-searchbar slot="start" [(ngModel)]="searchKey" (ionChange)="searchValue()" (ionClear)="cancelSearch()"
+    showCancelButton="focus" animated placeholder="Search Task"></ion-searchbar>
+</ion-toolbar>
+
+<ion-content [scrollEvents]="true" (ionScroll)="app.atScrollEnd($event, endScrollFunc)">
+  <ion-refresher disabled="false" slot="fixed" (ionRefresh)="ionRefresh($event)" (ionPull)="app.ionPull($event)"
+    (ionStart)="app.ionStart($event)">
+    <ion-refresher-content pullingIcon="arrow-dropdown" pullingText="Pull to refresh" refreshingSpinner="circles"
+      refreshingText="Refreshing...">
+    </ion-refresher-content>
+  </ion-refresher>
+  <div *ngFor="let item of dataView" style="margin-top:0.5rem">
+    <ion-item class="bg-white">
+      <div class="flex flex-row w-full w-full justify-between" *ngIf="item.is_parent" style="padding-top:1rem">
+        <div class="global-text-title items-start" style="color:var(--ion-color-primary)">
+          <b>{{item.name}}</b>
+        </div>
+        <div class="global-text-little-detail self-center items-end"
+          style="color:var(--ion-color-tertiary); margin-left: 0.5rem;">
+          parent
+        </div>
+      </div>
+      <div class="flex flex-row w-full" *ngIf="!item.is_parent">
+        <div class="flex flex-col w-full">
+          <div class="flex flex-row w-full justify-between">
+            <div class="flex flex-col self-center">
+              <div class="global-text-regular" *ngIf="item.parent_task">
+                <b>{{item.parent_task}}</b>
+              </div>
+              <div class="global-text-desc" style="margin-top:0.25 rem">
+                <b>{{item.name}}</b>
+              </div>
+            </div>
+            <div class="flex flex-col items-end">
+              <div class="text-emphasize-med" style="padding: 0rem 0 0.25rem 0.25rem; color:var(--ion-color-primary)">
+                <b>{{item.weight | number:'0.0-2'}}%</b>
+              </div>
+              <div class="global-text-little-detail">Bobot</div>
+            </div>
+          </div>
+          <div class="global-text-little-detail" style="margin:0.5rem 0rem 0.5rem 0">
+            <ion-icon name="calendar"></ion-icon>&nbsp;{{item.start_date | date:'dd MMM yyyy'}} - {{item.end_date |
+            date:'dd MMM yyyy'}} ( {{item.duration}}
+            hari )
+          </div>
+          <div class="flex flex-col w-full" style="margin-bottom:0.5rem">
+            <div class="flex flex-row justify-between" style="padding:0.25rem">
+              <div class="global-text-desc dim-text items-start">PIC</div>
+              <div class="global-text-desc items-end"><b>{{item.pic ? item.pic : '-'}}</b></div>
+            </div>
+            <div class="flex flex-row justify-between" style="padding:0.25rem">
+              <div class="global-text-desc dim-text items-start">Harga Satuan</div>
+              <div class="global-text-desc items-end"><b>{{item.price | currency:"Rp. ":true:"1.0"}}</b>
+              </div>
+            </div>
+            <div class="flex flex-row justify-between" style="padding:0.25rem">
+              <div class="global-text-desc dim-text items-start">Qty</div>
+              <div class="global-text-desc items-end"><b>{{item.qty}}</b>&nbsp;<span
+                  style="font-size: 0.75rem;">{{item.unit ? item.unit : '-'}}</span></div>
+            </div>
+            <div class="flex flex-row justify-between" style="padding:0.25rem">
+              <div class="global-text-desc dim-text items-start">Sub-Total</div>
+              <div class="global-text-desc items-end">
+                <b>{{ item.price * item.qty | currency:"Rp. ":true:"1.0"}}</b>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="self-center" style="color:var(--ion-color-primary)">
+          <ion-icon name="ellipsis-vertical-outline" (click)="presentOptions($event, item)" size="large"></ion-icon>
+        </div>
+      </div>
+    </ion-item>
+  </div>
+</ion-content>
+
+<ion-footer style="background:var(--ion-color-dark);padding:0.25rem 1rem 0.25rem 1rem;">
+  <div class="flex flex-col">
+    <div class="flex flex-row w-full justify-between">
+      <div class="global-text-desc self-center" style="color:white;">Total Nilai</div>
+      <div class="global-text-regular" style="color:var(--ion-color-tertiary);">{{totalValue |
+        currency:"Rp.":true:"1.0"}}</div>
+    </div>
+    <div class="flex flex-row w-full justify-between">
+      <div class="global-text-desc self-center" style="color:white;">Total Durasi</div>
+      <div class="global-text-regular" style="color:var(--ion-color-tertiary);">{{totalDuration}} <span
+          style="font-size: 0.85rem;">hari</span></div>
+    </div>
+  </div>
+</ion-footer>

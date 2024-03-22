@@ -1,0 +1,11 @@
+:host {
+    background-color: red !important;
+    // padding-left: unset;
+    // padding-right: unset;
+    // padding-inline-start: var(--padding-start);
+    // padding-inline-end: var(--padding-end);
+}
+
+ion-popover {
+    --max-width: 300px;
+}

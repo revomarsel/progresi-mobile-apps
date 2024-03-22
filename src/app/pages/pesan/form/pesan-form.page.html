@@ -1,0 +1,219 @@
+<HeaderGlobal [props]="props" (event)="eventHandler($event)"></HeaderGlobal>
+
+<ion-content>
+  <!-- NEW THREAD -->
+  <form
+    (ngSubmit)="submit()"
+    [formGroup]="onPesanForm"
+    class="form-page"
+    *ngIf="type==='create'"
+  >
+    <ion-item no-padding class="animated fadeInUp">
+      <ion-label position="floating">
+        <b class="textcolor-dark">Topik</b>
+      </ion-label>
+      <ion-input
+        class="textcolor-dark"
+        type="text"
+        [(ngModel)]="pesan.topic"
+        formControlName="topic"
+      ></ion-input>
+    </ion-item>
+    <p
+      ion-text
+      class="text08"
+      *ngIf="onPesanForm.get('topic').touched && onPesanForm.get('topic').hasError('required')"
+    >
+      <ion-text color="warning"> Field harus diisi </ion-text>
+    </p>
+    <ion-item no-padding class="animated fadeInUp">
+      <span class="textcolor-dark" style="width: 30%"
+        ><strong>Proyek</strong></span
+      >
+      <ionic-selectable
+        formControlName="projects"
+        [(ngModel)]="chosenProjectName"
+        [items]="projects"
+        itemValueField="id"
+        itemTextField="name"
+        [canSearch]="true"
+        (onChange)="changeProject($event)"
+      >
+      </ionic-selectable>
+    </ion-item>
+    <p
+      ion-text
+      class="text08"
+      *ngIf="onPesanForm.get('projects').touched && onPesanForm.get('projects').hasError('required')"
+    >
+      <ion-text color="warning"> Field harus diisi </ion-text>
+    </p>
+    <ion-item no-padding class="animated fadeInUp">
+      <span class="textcolor-dark" style="width: 30%"
+        ><strong>Task</strong></span
+      >
+      <ionic-selectable
+        placeholder="(pilih proyek terlebih dahulu)"
+        formControlName="tasks"
+        [(ngModel)]="chosenTaskName"
+        [items]="tasks"
+        itemValueField="task_code"
+        itemTextField="task_name"
+        [canSearch]="true"
+        (onChange)="changeTask($event)"
+      >
+      </ionic-selectable>
+    </ion-item>
+    <p
+      ion-text
+      class="text08"
+      *ngIf="onPesanForm.get('tasks').touched && onPesanForm.get('tasks').hasError('required')"
+    >
+      <ion-text color="warning"> Field harus diisi </ion-text>
+    </p>
+    <ion-item no-padding class="animated fadeInUp">
+      <ion-label position="floating">
+        <b class="textcolor-dark">Komentar</b>
+      </ion-label>
+      <ion-textarea
+        class="textcolor-dark"
+        rows="10"
+        cols="20"
+        placeholder="Masukkan komentar"
+        [(ngModel)]="pesan.comment"
+        formControlName="comment"
+      ></ion-textarea>
+    </ion-item>
+    <p
+      ion-text
+      color="warning"
+      class="text08"
+      *ngIf="onPesanForm.get('comment').touched && onPesanForm.get('comment').hasError('required')"
+    >
+      <ion-text color="warning"> Field harus diisi </ion-text>
+    </p>
+    <ion-button
+      size="medium"
+      expand="full"
+      expand="block"
+      color="primary"
+      color="dark"
+      type="submit"
+      [disabled]="!onPesanForm.valid"
+    >
+      <ion-icon name="chatbubbles-outline"></ion-icon>
+      &nbsp;Submit Thread
+    </ion-button>
+    <ion-button
+      size="medium"
+      expand="full"
+      expand="block"
+      color="secondary"
+      (click)="takePicture()"
+      style="margin-top: 20px"
+    >
+      <ion-icon name="camera"></ion-icon>
+      &nbsp;Upload Foto
+    </ion-button>
+    <ion-item
+      *ngFor="let item of pesan.picture"
+      class="animated fadeInUp no-padding"
+    >
+      <ion-thumbnail slot="start">
+        <img [src]="item.file" />
+      </ion-thumbnail>
+      <ion-grid>
+        <ion-row>
+          <ion-col size="10" style="text-align: left" class="ion-text-wrap">
+            <em (click)="typeCaption(item)"
+              >{{item.info ? item.info : '--no caption--'}}</em
+            >
+          </ion-col>
+          <ion-col size="2" style="text-align: right">
+            <ion-icon
+              name="close"
+              (click)="removeFile(item)"
+              size="small"
+            ></ion-icon>
+          </ion-col>
+        </ion-row>
+      </ion-grid>
+    </ion-item>
+  </form>
+  <!-- REPLY TO THREAD -->
+  <form
+    (ngSubmit)="submitReply()"
+    [formGroup]="onReplyForm"
+    class="form-page"
+    *ngIf="type!='create'"
+  >
+    <ion-item no-padding class="animated fadeInUp">
+      <ion-label position="floating">
+        <b>Komentar</b>
+      </ion-label>
+      <ion-textarea
+        class="textcolor-dark"
+        rows="10"
+        cols="20"
+        placeholder="Masukkan komentar"
+        [(ngModel)]="pesan.comment"
+        formControlName="comment"
+      ></ion-textarea>
+    </ion-item>
+    <p
+      ion-text
+      color="warning"
+      class="text08"
+      *ngIf="onReplyForm.get('comment').touched && onReplyForm.get('comment').hasError('required')"
+    >
+      <ion-text color="warning"> Field harus diisi </ion-text>
+    </p>
+    <ion-button
+      size="medium"
+      expand="full"
+      expand="block"
+      color="primary"
+      color="dark"
+      type="submit"
+      [disabled]="!onReplyForm.valid"
+    >
+      <ion-icon name="chatbubbles-outline"></ion-icon>
+      &nbsp;Submit Balasan
+    </ion-button>
+    <ion-button
+      size="medium"
+      expand="full"
+      expand="block"
+      color="secondary"
+      (click)="takePicture()"
+      style="margin-top: 20px"
+    >
+      <ion-icon name="camera"></ion-icon>
+      &nbsp;Upload Foto
+    </ion-button>
+    <ion-item
+      *ngFor="let item of pesan.picture"
+      class="animated fadeInUp no-padding"
+    >
+      <ion-thumbnail slot="start">
+        <img [src]="item.file" />
+      </ion-thumbnail>
+      <ion-grid>
+        <ion-row>
+          <ion-col size="10" style="text-align: left" class="ion-text-wrap">
+            <em (click)="typeCaption(item)"
+              >{{item.info ? item.info : '--no caption--'}}</em
+            >
+          </ion-col>
+          <ion-col size="2" style="text-align: right">
+            <ion-icon
+              name="close"
+              (click)="removeFile(item)"
+              size="small"
+            ></ion-icon>
+          </ion-col>
+        </ion-row>
+      </ion-grid>
+    </ion-item>
+  </form>
+</ion-content>

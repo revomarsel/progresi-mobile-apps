@@ -1,0 +1,184 @@
+<HeaderGlobal [props]="props" (event)="eventHandler($event)"></HeaderGlobal>
+<ion-toolbar *ngIf="props.search.enable" color="dark">
+  <ion-searchbar
+    slot="start"
+    [(ngModel)]="searchKey"
+    (ionChange)="searchValue()"
+    (ionClear)="cancelSearch()"
+    showCancelButton="focus"
+    animated
+  ></ion-searchbar>
+</ion-toolbar>
+
+<ion-content>
+  <ion-refresher
+    slot="fixed"
+    (ionRefresh)="ionRefresh($event)"
+    (ionPull)="app.ionPull($event)"
+    (ionStart)="app.ionStart($event)"
+  >
+    <ion-refresher-content
+      pullingIcon="arrow-dropdown"
+      pullingText="Pull to refresh"
+      refreshingSpinner="circles"
+      refreshingText="Refreshing..."
+    >
+    </ion-refresher-content>
+  </ion-refresher>
+  <div class="center-item">
+    <ion-spinner
+      [hidden]="isDataEmpty || (data && data.length > 0)"
+      name="dots"
+    ></ion-spinner>
+    <div *ngIf="isDataEmpty && (data && data.length < 1)">-- NO DATA --</div>
+  </div>
+  <!-- input -->
+  <ion-card
+    *ngIf="roleName === 'superadmin.' || roleName === 'projectadmin.' || roleName === 'projectmanager.'"
+    (click)="inputMode = !inputMode"
+    [hidden]="isViewOnly || inputMode"
+  >
+    <ion-card-content style="padding: 0.75rem">
+      <div class="flex flex-col" style="align-items: center">
+        <ion-icon class="expander" name="add-outline" size="large"></ion-icon>
+        <span class="global-text-little-detail">
+          {{ !data || data.length < 1 ? 'empty data, add data now' : 'add data'
+          }}
+        </span>
+      </div>
+    </ion-card-content>
+  </ion-card>
+  <ion-card
+    *ngIf="roleName === 'superadmin.' || roleName === 'projectadmin.' || roleName === 'projectmanager.'"
+    [hidden]="!inputMode"
+  >
+    <ion-card-content style="padding: 0.75rem">
+      <ion-item>
+        <ion-label position="floating">
+          <span class="text-primary">Name</span>
+        </ion-label>
+        <ion-input
+          type="text"
+          [(ngModel)]="capaianName"
+          [disabled]="isViewMode"
+          placeholder="Nama Capaian"
+        >
+        </ion-input>
+      </ion-item>
+      <ion-item>
+        <ion-label position="floating">
+          <span class="text-primary">Tanggal Deadline</span>
+        </ion-label>
+        <ion-datetime
+          displayFormat="DD MMM YYYY"
+          placeholder="Tanggal"
+          [(ngModel)]="deadlineDate"
+        ></ion-datetime>
+      </ion-item>
+      <ionic-selectable
+        [(ngModel)]="selectedTask"
+        [items]="tasks"
+        itemValueField="task_code"
+        itemTextField="task_name"
+        groupValueField="task_parent"
+        groupTextField="task_parent"
+        [canSearch]="true"
+        placeholder="Select Task"
+        [isMultiple]="true"
+      >
+        >
+        <ng-template ionicSelectableTitleTemplate>Daftar Task</ng-template>
+        <ng-template ionicSelectableItemTemplate let-task="item">
+          <div class="flex flex-col w-full py-2 global-text-desc">
+            <p class="text-ellipsis text-primary font-bold">
+              {{task.task_name}}
+            </p>
+            <div class="flex flex-row w-full justify-between py-2">
+              <span>Bobot</span>
+              <span class="font-bold">{{task.weight}}%</span>
+            </div>
+            <div class="flex flex-row w-full justify-between py-2">
+              <span>Progress Terakhir</span>
+              <span class="font-bold"
+                >{{task.weight}} / {{task.weight}}&nbsp;{{task.unit}}</span
+              >
+            </div>
+            <div class="flex flex-row w-full justify-between py-2">
+              <span>Harga Satuan</span>
+              <span class="font-bold"
+                >{{task.price | currency:"Rp.":true:"1.0"}}</span
+              >
+            </div>
+          </div>
+        </ng-template>
+      </ionic-selectable>
+      <ion-button class="w-full my-2" (click)="postData()">
+        <ion-icon name="save-outline"></ion-icon>&nbsp;Next
+      </ion-button>
+    </ion-card-content>
+  </ion-card>
+  <!-- list -->
+  <ion-card *ngFor="let item of data" class="p-4">
+    <div class="flex flex-row w-full justify-between py-2 mb-2">
+      <div class="flex flex-col" style="width: 80%">
+        <span class="global-text-regular font-bold text-dark pb-2"
+          >{{item.name}}</span
+        >
+        <span class="global-text-regular font-bold text-dark"
+          >{{item.created_time | date:'dd MMM yyyy - HH:mm'}}</span
+        >
+        <span class="global-text-desc">{{item.admin_name}}</span>
+      </div>
+      <div *ngIf="item.last_status === 'draft'" class="flex flex-col">
+        <div
+          class="flex flex-row text-primary pb-2"
+          (click)="goToDetails(item.id)"
+          style="border-bottom: 1px solid #ececeb"
+        >
+          <ion-icon name="pencil"></ion-icon>
+          <span class="global-text-little-detail text-primary">&nbsp;Edit</span>
+        </div>
+        <div
+          class="self-center text-danger pt-2"
+          (click)="deleteData(idx, item.id)"
+        >
+          <ion-icon name="trash"></ion-icon>
+          <span class="global-text-little-detail text-danger"
+            >&nbsp;Delete</span
+          >
+        </div>
+      </div>
+      <div *ngIf="item.last_status === 'submitted'" class="flex flex-col">
+        <div
+          class="flex flex-row text-primary pb-2"
+          (click)="goToDetails(item.id)"
+          style="border-bottom: 1px solid #ececeb"
+        >
+          <ion-icon name="document-text-outline"></ion-icon>
+          <span class="global-text-little-detail text-primary"
+            >&nbsp;Detail</span
+          >
+        </div>
+      </div>
+    </div>
+    <div
+      class="flex flex-col w-full py-2 bg-secondary"
+      style="border-radius: 10px"
+    >
+      <div class="flex flex-row w-full justify-between p-1">
+        <div class="flex flex-col w-half items-center">
+          <span class="global-text-regular text-white font-bold"
+            >{{item.total ? item.total : 0}}</span
+          >
+          <span class="global-text-little-detail text-tertiary">Item</span>
+        </div>
+        <div class="flex flex-col w-half items-center text-center">
+          <span class="global-text-regular text-white font-bold"
+            >{{item.total_ap ? item.total_ap : 0}}</span
+          >
+          <span class="global-text-little-detail text-tertiary">Approved</span>
+        </div>
+      </div>
+    </div>
+  </ion-card>
+</ion-content>

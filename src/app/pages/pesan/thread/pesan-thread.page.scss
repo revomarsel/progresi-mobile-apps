@@ -1,0 +1,97 @@
+:host {
+    ion-content {
+        --background: linear-gradient(-135deg, white, var(--ion-color-light))
+    }
+}
+
+.card-over {
+    transform: translate3d(0px, 62px, 0px);
+    position: absolute !important;
+    width: -webkit-stretch;
+}
+
+.card-container {
+    position: relative !important;
+}
+
+.pesan-name {
+    font-size:16px;
+    padding-top: 0px;
+    padding-right: 10px;
+    padding-bottom: 0px;
+    padding-left: 0px;
+}
+
+.btn-role {
+  border: none;
+  color: white;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  margin: 2px 2px;
+  padding: 4px;
+}
+
+.pesan-time {
+    font-size:14px;
+    padding-top: 0px;
+    padding-right: 10px;
+    padding-bottom: 0px;
+    padding-left: 0px;
+}
+
+.pesan-title {
+    font-size:20px;
+    padding-top: 5px;
+    padding-right: 10px;
+    padding-bottom: 0px;
+    padding-left: 0px;
+}
+
+.pesan-recipient {
+    font-size:16px;
+    padding-top: 0px;
+    padding-right: 10px;
+    padding-bottom: 0px;
+    padding-left: 0px;
+}
+
+.max-lines {
+    display: inline-block; /* or inline-block */
+    text-overflow: ellipsis;
+    word-wrap: break-word;
+    overflow: hidden;
+    height: 5.0em;
+    // line-height: 1.8em;
+    font-size: 12px;
+}
+
+.pesan-approval {
+    font-size:14px;
+    padding-top: 0px;
+    padding-right: 10px;
+    padding-bottom: 0px;
+    padding-left: 0px;
+    text-align: right;
+    font-weight: bold;
+}
+
+.pesan-card {
+    .read{
+        background-color:grey;
+        color: black;
+    }
+    .unread{
+        background-color: white;
+        color: black;
+    }
+}
+
+.reply-card {
+    .own{
+        background-color:lightyellow;
+    }
+    .other{
+        background-color:whitesmoke;
+    }
+}

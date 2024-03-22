@@ -1,0 +1,8 @@
+<ion-toolbar mode="md" slot="bottom">
+  <ion-segment mode="md" scrollable [value]="current">
+    <ion-segment-button mode="md" *ngFor="let item of props.items; let i = index" [value]="item.key ? item.key : item.name" layout="icon-top" (click)="item.key ? showTab(item.key) : showTab(item.name)">
+      <ion-icon *ngIf="item.icon" [icon]="item.icon" style="margin-bottom: 2px;"></ion-icon>
+      <ion-label class="ion-text-wrap" style="font-weight: 600;">{{item.name}}</ion-label>
+    </ion-segment-button>
+  </ion-segment>
+</ion-toolbar>

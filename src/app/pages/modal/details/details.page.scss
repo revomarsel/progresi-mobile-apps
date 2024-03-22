@@ -1,0 +1,43 @@
+:host {
+  ion-content {
+    // --background: linear-gradient(-135deg, var(--ion-color-medium), var(--ion-color-light))
+    --background: white;
+  }
+}
+
+ion-content {
+    img {
+        object-fit: cover;
+    }
+}
+
+//for every feature
+.news-container{
+  background-color: #fff;
+  .title{
+    font-size:22px;
+    padding-top: 8px;
+    padding-right: 10px;
+    padding-bottom: 5px;
+    padding-left: 10px;
+  }
+  .creator{
+    font-size:15px;
+    padding-top: 0px;
+    padding-right: 10px;
+    padding-bottom: 20px;
+    padding-left: 10px;
+  }
+  .content{
+    font-size:15px;
+    padding-top: 0px;
+    padding-right: 10px;
+    padding-bottom: 10px;
+    padding-left: 10px;
+  }
+}
+
+.ls-cuaca{
+  display: flex!important;
+  align-items: center!important;
+}

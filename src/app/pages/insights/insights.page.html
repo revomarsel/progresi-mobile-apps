@@ -1,0 +1,101 @@
+<HeaderGlobal [props]="props" (event)="eventHandler($event)"></HeaderGlobal>
+<ion-toolbar *ngIf="props.search.enable" color="dark">
+  <ion-searchbar slot="start" [(ngModel)]="searchKey" (ionChange)="searchValue()" (ionClear)="cancelSearch()"
+    showCancelButton="focus" animated></ion-searchbar>
+</ion-toolbar>
+<Tabs *ngIf="props.tabs.enable" [props]="props.tabs" (event)="eventHandler($event)"></Tabs>
+<Filter *ngIf="props.filter.enable" [props]="props.filter" (event)="eventHandler($event)"></Filter>
+<PopOver [props]="props" (event)="eventHandler($event)"></PopOver>
+<ion-toolbar>
+    <!-- Date search -->
+    <div class="flex flex-row w-full" style="padding: 0 1rem 0 1rem;">
+      <div class="w-half flex flex-row global-text-desc">
+        <b class="self-center" style="color: var(--ion-color-primary);">Dari</b>
+        <ion-datetime displayFormat="DD MMM YYYY" placeholder="Tanggal" (ionChange)="setFilterDate($event, 'start')" [(ngModel)]="startDate" [max]="endDate">
+        </ion-datetime>
+      </div>
+      <div class="w-half flex flex-row global-text-desc">
+        <b class="self-center" style="color: var(--ion-color-primary);">Hingga</b>
+        <ion-datetime displayFormat="DD MMM YYYY" placeholder="Tanggal" (ionChange)="setFilterDate($event, 'end')" [(ngModel)]="endDate">
+        </ion-datetime>
+      </div>
+    </div>
+</ion-toolbar>
+
+<ion-content [scrollEvents]="true" (ionScroll)="app.atScrollEnd($event, endScrollFunc)">
+  <ion-refresher slot="fixed"
+    (ionRefresh)="ionRefresh($event)" (ionPull)="app.ionPull($event)" (ionStart)="app.ionStart($event)">
+    <ion-refresher-content pullingIcon="arrow-down" pullingText="Pull to refresh" refreshingSpinner="circles"
+      refreshingText="Refreshing...">
+    </ion-refresher-content>
+  </ion-refresher>
+  <div class="center-item">
+    <ion-spinner [hidden]="isDataEmpty || (data && data.length > 0)" name="dots"></ion-spinner>
+    <div *ngIf="isDataEmpty && (data && data.length < 1)">-- NO DATA --</div>
+  </div>
+  <!-- <virtual-scroller #scroll [items]="data" (vsUpdate)="props.virtualScrollOptions.setState($event)"> -->
+    <ion-card *ngFor="let item of dataView">
+      <div class="flex flex-row w-full">
+        <div class="flex justify-center" [ngStyle]="tab_time === 'New' ? {'background':'var(--ion-color-primary)'} : {'background':'var(--ion-color-dark)'}" 
+          style="width: 15%;">
+          <div class="self-center">
+            <ion-icon
+              [name]="item.type==='Equipment' ? 'build' : item.type==='Material' ? 'cube' : item.type==='Task' ? 'list' 
+              : item.type==='Worker' ? 'accessibility' : item.type==='Kendala' ? 'warning' : item.type==='Diskusi' ? 'chatbubbles' : item.type==='DailyReport' ? 'document-text-outline' :'' "
+              size="large" class="text-white">
+            </ion-icon>
+            <div class="flex flex-col align-center" *ngIf="item.read">
+              <ion-icon name="checkmark-outline" style="color:'#25d366'"></ion-icon>
+              <span class="text08 text-white">Read</span>
+            </div>
+          </div>
+        </div>
+        <div class="flex flex-col w-full" style="padding:0.5rem;width: 75%;">
+          <div class="text-black text1 py-2">
+            <span class="font-bold">{{item.m1}}</span>
+          </div>
+          <div class="flex flex-col w-full text-grey text085">
+            <span class="font-bold">{{item.m3}}</span>
+            <span [ngClass]="item.m3 && 'font-bold'">{{item.m4}}</span>
+          </div>
+          <div style="padding: 0.75rem 0 0.75rem 0">
+            <span class="text-black text1">{{item.m2}}</span>
+          </div>
+          <span class="text-grey text085">{{ alpro.dateFormat(item.notif_start) }}</span>
+        </div>
+        <div class="flex justify-center" style="width: 10%;">
+          <ion-icon class="self-center" name="ellipsis-vertical-outline" (click)="presentOptions($event, item.id)" size="large"></ion-icon>
+        </div>
+      </div>
+    </ion-card>
+
+    <!-- <ion-item-options>
+        <ion-item-option (click)="readNotification(item.id)" class="check-button">
+          <ion-icon slot="end" name="checkmark-outline" size="large"></ion-icon>
+        </ion-item-option>
+        <ion-item-option (click)="dismissNotification(item.id)" class="close-button">
+          <ion-icon slot="end" name="close" size="large"></ion-icon>
+        </ion-item-option>
+      </ion-item-options> -->
+    <!-- </ion-item-sliding> -->
+  <!-- </virtual-scroller> -->
+</ion-content>
+
+<ion-footer>
+  <Options *ngIf="props.options && props.options.enable" [props]="props.options" (event)="eventHandler($event)">
+  </Options>
+  <ion-toolbar mode="md" *ngIf="props.tabs.enable">
+    <ion-segment mode="md" scrollable value="New">
+      <ion-segment-button mode="md" value="New" layout="icon-top" [ngClass]="tab_time === 'New' && 'highlight'"
+        (click)="changeTime('New')">
+        <ion-label>Baru</ion-label>
+        <ion-icon icon="mail-unread"></ion-icon>
+      </ion-segment-button>
+      <ion-segment-button mode="md" value="Old" layout="icon-top" [ngClass]="tab_time === 'Old' && 'highlight'"
+        (click)="changeTime('Old')">
+        <ion-label>Dihentikan</ion-label>
+        <ion-icon icon="mail-open"></ion-icon>
+      </ion-segment-button>
+    </ion-segment>
+  </ion-toolbar>
+</ion-footer>

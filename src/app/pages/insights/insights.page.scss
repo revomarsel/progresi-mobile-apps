@@ -1,0 +1,9 @@
+:host {
+    ion-content {
+        --background: linear-gradient(-135deg, white, white)
+    }
+}
+
+ion-footer ion-toolbar:last-of-type {
+    padding-bottom: 0px !important;
+}

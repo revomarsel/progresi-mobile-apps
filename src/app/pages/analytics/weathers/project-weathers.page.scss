@@ -1,0 +1,101 @@
+:host {
+  ion-content {
+    --background: var(--ion-color-light);
+  }
+}
+
+ion-item {
+  --border-color: white !important;
+  --border-style: 0;
+  //margin:10px 20px;
+}
+
+ion-label {
+  font-size: 10px !important;
+}
+.ls-weather .jam {
+  font-size: 12px;
+  font-weight: normal;
+}
+.ls-weather ion-col {
+  font-weight: bold;
+}
+.ls-weather {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  border-top: 2px solid #ededed;
+  border-bottom: 2px solid #ededed;
+}
+
+.ls-cuaca {
+  display: flex !important;
+  align-items: center !important;
+}
+
+.legend-color {
+  height: 30px;
+  background-color: #e1eb21 !important;
+}
+.legend-color-today {
+  padding: 10px;
+  border-radius: 5px;
+  background-color: #c1c1c1 !important;
+}
+.legend-text {
+  padding-top: 3px;
+  padding-left: 5px;
+  font-size: 14px;
+}
+
+.legend-color-cerah {
+  padding: 10px;
+  border-radius: 5px;
+  background-color: #f5e042 !important;
+}
+
+.legend-color-libur {
+  padding: 10px;
+  border-radius: 5px;
+  background-color: #c93434 !important;
+}
+
+.legend-color-hujan {
+  padding: 10px;
+  border-radius: 5px;
+  background-color: #34c9bc !important;
+}
+
+.legend-color-gerimis {
+  padding: 10px;
+  border-radius: 5px;
+  background-color: #99fff6 !important;
+}
+
+.legend {
+  margin: 15px;
+}
+
+.lg-show {
+  display: block;
+}
+.lg-hide {
+  display: none;
+}
+
+.vanilla-calendar-week {
+  background-color: black !important;
+}
+
+.d-flex {
+  display: flex;
+}
+
+.mr-2 {
+  margin-right: 10px;
+}
+.mr-3 {
+  margin-right: 17px;
+}

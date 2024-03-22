@@ -1,0 +1,254 @@
+<HeaderGlobal [props]="props" (event)="eventHandler($event)"></HeaderGlobal>
+
+<ion-content>
+    <ion-refresher disabled="false" slot="fixed" (ionRefresh)="ionRefresh($event)" (ionPull)="app.ionPull($event)"
+            (ionStart)="app.ionStart($event)">
+            <ion-refresher-content pullingIcon="arrow-dropdown" pullingText="Pull to refresh" refreshingSpinner="circles"
+              refreshingText="Refreshing...">
+            </ion-refresher-content>
+          </ion-refresher>
+    <div *ngIf="!expandNavigator" style="
+        height: 70%;
+        overflow-y: scroll;
+        position: relative;
+    ">
+        <div style="
+            width: 100%;
+            position:absolute; 
+            background-color: white;
+        ">
+            <div *ngIf="data && data.length > 0">
+                <div class="p-2">
+                    <ion-item style="margin-bottom: 20px;" class="ion-no-padding">
+                        <ionic-selectable [(ngModel)]="selectedTask" [items]="tasks"
+                            [disabled]="data[selectedTaskIdx].readonly" itemValueField="task_code"
+                            itemTextField="task_name" groupValueField="task_parent" groupTextField="task_parent"
+                            [canSearch]="true" (onChange)="changeTask($event)" (click)="changeTask_click($event)" placeholder="*Click Untuk Pilih Pekerjaan">
+                            <ng-template ionicSelectableTitleTemplate>Daftar Task</ng-template>
+                            <ng-template ionicSelectableItemTemplate let-task="item">
+                                <p class="text-ellipsis">{{task.task_name}}<br><span
+                                        style="color:grey;">{{task.percentage}}%</span></p>
+                            </ng-template>
+                        </ionic-selectable>
+                    </ion-item>
+                    <div *ngIf="data[selectedTaskIdx].task_id == null" class="flex flex-row" style="margin-left: -10px;font-size: 12px;margin-top: -5px;">
+                        <div class="flex flex-row" style="margin-bottom: 5px;width: 100%">
+                            <ion-icon name="arrow-up-outline" style="zoom:1.25; width: 13%"></ion-icon>
+                            <div>Pilih Pekerjaan Lalu Mulai Isi Volume</div>
+                        </div>
+                    </div>
+                    <div *ngIf="data[selectedTaskIdx].task_id != null" class="flex flex-row" style="margin-left: -10px;font-size: 12px;margin-top: -5px;">
+                        <div class="flex flex-row" style="margin-bottom: 5px;width: 100%">
+                            <ion-icon name="calendar" style="zoom:1.25; width: 13%"></ion-icon>
+                            <div>{{data[selectedTaskIdx].start_date | date:'dd MMM yyyy'}} s.d. {{data[selectedTaskIdx].end_date
+                                | date:'dd MMM yyyy'}} | Durasi {{data[selectedTaskIdx].duration}} hari</div>
+                        </div>
+                    </div>
+                </div>
+                <div *ngIf="data[selectedTaskIdx].task_id != null">
+                    <div class="input-item-navigator bg-blue-soft">
+                        <div style="width:100%">
+                            <p class="gray-bold">Input Volume Harian</p>
+                        </div>
+                    </div>
+                    <div style="justify-content:space-between;margin-bottom: 10px" class="flex flex-row w-full justify-between p-2">
+                        <div *ngIf="selectedForm != 'volume_harian'" style="width: 45%;align-self: end;" class="flex flex-col">
+                            <ion-item class="ion-no-padding">
+                                <ion-input type="number" [(ngModel)]="data[selectedTaskIdx].completion"
+                                    (click)="changeType('volume_harian',data[selectedTaskIdx].completion)" [disabled]="isViewMode" class="global-text-title text-big">
+                                </ion-input>
+                                {{data[selectedTaskIdx].unit}}
+                            </ion-item>
+                        </div>
+                        <div *ngIf="selectedForm == 'volume_harian'" style="width: 45%;align-self: end;" class="flex flex-row">
+                            <ion-input type="number" [(ngModel)]="data[selectedTaskIdx].completion"
+                            (ionChange)="calculateProgress('volume_harian',data[selectedTaskIdx].completion)" [disabled]="isViewMode" class="text-emphasize-big text-primary text-ellipsis text-big border-bottom-blue">
+                            </ion-input>
+                            <span class="self-center text-primary font-bold">{{data[selectedTaskIdx].unit}}</span>
+                        </div>
+                        <div *ngIf="selectedForm != 'persentase_harian'" class="flex flex-row justify-center" style="width: 40%;margin-right: 25px;">
+                            <ion-item class="ion-no-padding">
+                                <ion-input type="number" [(ngModel)]="data[selectedTaskIdx].capaian"
+                                (click)="changeType('persentase_harian',data[selectedTaskIdx].capaian)" [disabled]="isViewMode" class="global-text-title text-big">
+                                </ion-input>
+                                <span class="text-big self-center">%</span>
+                            </ion-item>
+                        </div>
+                        <div *ngIf="selectedForm == 'persentase_harian'" class="flex flex-row justify-center" style="width: 40%;margin-right: 25px;">
+                            <ion-input type="number" [(ngModel)]="data[selectedTaskIdx].capaian"
+                            (ionChange)="calculateProgress('persentase_harian',data[selectedTaskIdx].capaian)" [disabled]="isViewMode" class="text-emphasize-big text-primary text-ellipsis text-big border-bottom-blue">
+                            </ion-input>
+                            <span class="self-center text-big text-primary font-bold">%</span>
+                        </div>
+                    </div>
+                    <div class="flex flex-row p-2" style="margin-bottom: 20px">
+                        <div style="width: 40%" class="flex flex-col self-center">
+                            <span class="global-text-little-detail text">Target Untuk Diselesaikan Hari ini</span>
+                        </div>
+                        <div style="width:60%" class="flex flex-col self-center">
+                            <span class="text-emphasize-big" style="align-self:center; color:var(--ion-color-primary)">
+                                {{data[selectedTaskIdx].target_harian | number:'0.0-2' }}
+                                <span class="text-support">{{data[selectedTaskIdx].unit}} / 100%</span>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="input-item-navigator bg-blue-soft">
+                        <div style="width:100%">
+                            <p class="gray-bold">Input Kumulatif Volume</p>
+                        </div>
+                    </div>
+                    <div style="justify-content:space-between;margin-bottom: 10px" class="flex flex-row w-full justify-between p-2">
+                        <div *ngIf="selectedForm != 'volume_kumulatif'" style="width: 45%;align-self: end;" class="flex flex-col">
+                            <ion-item class="ion-no-padding">
+                                <ion-input type="number" [(ngModel)]="data[selectedTaskIdx].sum_completion"
+                                    (click)="changeType('volume_kumulatif',data[selectedTaskIdx].sum_completion)" [disabled]="isViewMode" class="global-text-title text-big">
+                                </ion-input>
+                                {{data[selectedTaskIdx].unit}}
+                            </ion-item>
+                        </div>
+                        <div *ngIf="selectedForm == 'volume_kumulatif'" style="width: 45%;align-self: end;" class="flex flex-row">
+                                <ion-input type="number" [(ngModel)]="data[selectedTaskIdx].sum_completion"
+                                (ionChange)="calculateProgress('volume_kumulatif',data[selectedTaskIdx].sum_completion)" [disabled]="isViewMode" class="text-emphasize-big text-primary text-ellipsis text-big border-bottom-blue">
+                                </ion-input>
+                                <span class="self-center text-primary font-bold">{{data[selectedTaskIdx].unit}}</span>
+                        </div>
+                        <div *ngIf="selectedForm != 'persentase_kumulatif'" class="flex flex-row justify-center" style="width: 40%;margin-right: 25px;">
+                            <!-- style="align-self:center; margin:auto; color:var(--ion-color-primary);" -->
+                            <ion-item class="ion-no-padding">
+                                <ion-input type="number" [(ngModel)]="data[selectedTaskIdx].capaian_till_now"
+                                    (click)="changeType('persentase_kumulatif',data[selectedTaskIdx].capaian_till_now)" [disabled]="isViewMode" class="global-text-title text-big">
+                                </ion-input>
+                                <span class="text-big self-center">%</span>
+                            </ion-item>
+                        </div>
+                        <div *ngIf="selectedForm == 'persentase_kumulatif'" class="flex flex-row justify-center" style="width: 40%;margin-right: 25px;">
+                            <!-- style="align-self:center; margin:auto; color:var(--ion-color-primary);" -->
+                                <ion-input type="number" [(ngModel)]="data[selectedTaskIdx].capaian_till_now"
+                                (ionChange)="calculateProgress('persentase_kumulatif',data[selectedTaskIdx].capaian_till_now)" [disabled]="isViewMode" class="text-emphasize-big text-primary text-ellipsis text-big border-bottom-blue">
+                                </ion-input>
+                                <span class="self-center text-big text-primary font-bold">%</span>
+                        </div>
+                    </div>
+                    <div class="flex flex-row p-2" style="margin-bottom: 20px">
+                        <div style="width: 40%" class="flex flex-col self-center">
+                            <span class="global-text-little-detail text">Kumulatif Volume Pekerjaan Selesai</span>
+                        </div>
+                        <div style="width:60%" class="flex flex-col self-center">
+                            <span class="text-emphasize-big" style="align-self:center; color:var(--ion-color-primary)">
+                                {{data[selectedTaskIdx].qty | number:'0.0-2'}}
+                                <span class="text-support">{{data[selectedTaskIdx].unit}} / 100%</span>
+                            </span>
+                        </div>
+                    </div>
+                    <!-- <div class="flex flex-row p-2" style="margin-bottom: 20px">
+                        <div style="width: 45%" class="flex flex-col self-center">
+                            <span class="text-emphasize-big" style="align-self:center; color:var(--ion-color-primary)">
+                                {{data[selectedTaskIdx].target_harian | number:'0.0-2' }}
+                                <span class="text-support">{{data[selectedTaskIdx].unit}}</span>
+                            </span>
+                            <div class="flex flex-col">
+                                <span class="text-emphasize-med" style="align-self:center">{{
+                                    data[selectedTaskIdx].target_kumulatif | number:'0.0-2' }}
+                                    <span class="text-support">%</span>
+                                </span>
+                                <span class="global-text-little-detail centerize text">Target kumulatif</span>
+                            </div>
+                        </div>
+                        <div style="width: 10%" class="flex flex-col self-center">
+                            <div class="border">
+
+                            </div>
+                        </div>
+                        <div style="width: 45%" class="flex flex-col self-center">
+                            <span class="text-emphasize-big" style="align-self:center; color:var(--ion-color-primary)">
+                                {{data[selectedTaskIdx].qty | number:'0.0-2'}}
+                                <span class="text-support">{{data[selectedTaskIdx].unit}}</span>
+                            </span>
+                            <span class="global-text-little-detail centerize text">Target Kumulatif Pekerjaan Selesai</span>
+                        </div>
+                    </div> -->
+                    <div class="input-item-navigator bg-blue-soft">
+                        <div style="width:100%">
+                            <p class="gray-bold">Input Total Pekerja</p>
+                        </div>
+                    </div>
+                    <div style="justify-content:space-between;margin-bottom: 20px" class="flex flex-row p-2">
+                        <div style="width: 45%;" class="flex flex-col">
+                            <ion-item style="margin-bottom: 10px;" class="ion-no-padding">
+                                <ion-input type="number" [(ngModel)]="data[selectedTaskIdx].tukang" [disabled]="isViewMode"
+                                    class="global-text-title"></ion-input>
+                                <ion-icon size="small" name="person"></ion-icon>
+                            </ion-item>
+                            <span class="global-text-little-detail">Tukang</span>
+                        </div>
+                        <div style="width: 45%;" class="flex flex-col">
+                            <ion-item style="margin-bottom: 10px;" class="ion-no-padding">
+                                <ion-input type="number" [(ngModel)]="data[selectedTaskIdx].pembantu_tukang"
+                                    [disabled]="isViewMode" class="global-text-title"></ion-input>
+                                <ion-icon size="small" name="person"></ion-icon>
+                            </ion-item>
+                            <span class="global-text-little-detail">Pbt. Tukang</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="input-item-navigator">
+        <div style="width:85%">
+            <p style="color:white">Laporan Pekerjaan {{day | date:'dd MMM yyyy'}}</p>
+        </div>
+        <div class="flex flex-row" style="width:15%; justify-content: space-between;">
+            <ion-icon name="add-sharp" [ngStyle]="
+                {
+                    'color': 'white',
+                    'zoom' : 1.25
+                }" (click)="addTask()">
+            </ion-icon>
+            <ion-icon [name]="!expandNavigator ? 'chevron-up-sharp' : 'chevron-down-sharp'"
+                style="color:var(--ion-color-tertiary); zoom:1.25" (click)="expandNavigator = !expandNavigator">
+            </ion-icon>
+        </div>
+    </div>
+    <div *ngIf="data && data.length > 0" [ngStyle]="
+        {
+            'height': !expandNavigator ? '25%' : '95%',
+            'position': 'relative',
+            'overflow-y': 'scroll'
+        }
+    ">
+        <div style="
+            position: absolute;
+            width: 100%;
+        ">
+            <!-- <ion-toolbar mode="md" color="dark" style="padding: 0 1rem 0 1rem;" *ngIf="showQuickNav">
+                <ionic-selectable #quickNavSelection [items]="data" itemValueField="task_code" itemTextField="task_name"
+                    groupValueField="task_parent" groupTextField="task_parent" [canSearch]="true"
+                    (onChange)="quickNavigation($event)" placeholder="*Click Untuk Tampilkan Semua Task">
+                    <ng-template ionicSelectableTitleTemplate>Daftar Task</ng-template>
+                    <ng-template ionicSelectableItemTemplate let-task="item">
+                        <p class="text-ellipsis">{{task.task_name}}<br><span
+                                style="color:grey;">{{task.percentage}}%</span></p>
+                    </ng-template>
+                </ionic-selectable>
+            </ion-toolbar> -->
+            <ion-item *ngFor="let item of data; let idx = index" [ngStyle]="
+                {
+                    'padding': '5px 0px 0px 0px',
+                    'min-height' : '50px',
+                    'background-color': selectedTaskIdx === idx ? 'var(--ion-color-tertiary)' : 
+                    ( data[idx].completion === null || !data[idx].task_code ) ? 'grey' : 
+                    item.is_today ? '#e6ffc9' : ''
+                }
+                " (click)="changeSelectedTask(idx)">
+                <div style="width: 95%; display: flex; flex-direction: row;">
+                    <div style="font-size: 15px;">{{item.task_name ? item.task_name : '-'}}</div>
+                </div>
+                <div style="width: 5%;">
+                    <ion-icon *ngIf="!item.readonly" name="close" style="color:maroon; zoom: 1.1"
+                        (click)="deleteTask(idx, item.id)"></ion-icon>
+                </div>
+            </ion-item>
+        </div>
+    </div>
+</ion-content>

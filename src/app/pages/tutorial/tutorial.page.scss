@@ -1,0 +1,49 @@
+ion-toolbar {
+    // TODO test transparent and fullscreen
+    --background: transparent;
+    --border-color: transparent;
+  }
+
+  ion-slides {
+    height: 100%;
+  }
+  
+  .swiper-slide {
+    display: block;
+  }
+  
+  .slide-title {  
+    margin: 10px 10px 10px 10px;
+  }
+  
+  .slide-image {
+    max-height: 40%;
+    max-width: 60%;
+    margin: 20px 0px 10px 0px;
+    pointer-events: none;
+  }
+  
+  b {
+    font-weight: 500;
+  }
+  
+  p {
+    padding: 0 40px;
+    font-size: 14px;
+    line-height: 1.2;
+    color: var(--ion-color-step-600, #60646b);
+  
+    b {
+      color: var(--ion-text-color, #000000);
+    }
+  }
+
+  .tutorial-link {
+    color: var(--ion-color-primary);
+    font-size: 14px;
+  }
+
+  ion-button {
+    margin: 10px !important;
+  }
+  

@@ -1,0 +1,189 @@
+<HeaderGlobal [props]="props" (event)="eventHandler($event)"></HeaderGlobal>
+<Tabs *ngIf="props.tabs.enable" [props]="props.tabs" (event)="eventHandler($event)"></Tabs>
+<ion-toolbar *ngIf="props.search.enable" color="dark" [hidden]="props.search.hidden">
+  <ion-searchbar slot="start" [(ngModel)]="searchKey" (ionChange)="searchValue()" (ionClear)="cancelSearch()"
+    showCancelButton="focus" animated></ion-searchbar>
+</ion-toolbar>
+
+<ion-content>
+  <ion-refresher slot="fixed" (ionRefresh)="ionRefresh($event)" (ionPull)="app.ionPull($event)"
+    (ionStart)="app.ionStart($event)">
+    <ion-refresher-content pullingIcon="arrow-dropdown" pullingText="Pull to refresh" refreshingSpinner="circles"
+      refreshingText="Refreshing...">
+    </ion-refresher-content>
+  </ion-refresher>
+  <div class="center-item">
+    <ion-spinner [hidden]="isDataEmpty || (data && data.length > 0)" name="dots"></ion-spinner>
+    <div *ngIf="isDataEmpty && (data && data.length < 1)">-- NO DATA --</div>
+  </div>
+  <div *ngIf="props.tabs.current === 'type'">
+    <ion-card *ngFor="let item of workerData" (click)="expandData(item.key)" style="padding:0.5rem">
+      <div class="flex flex-col w-full">
+        <div class="flex flex-row justify-between global-text-regular">
+          <div class="flex flex-col">
+            <strong class="text-primary" style="margin-bottom: 5px">{{item.key | date:'dd MMM yyyy'}}</strong>
+            <div class="flex flex-row" style="margin-bottom: 10px" *ngIf="app.auth.user.UserRoles[0].id !== 4 ">
+              <ion-icon name="cash" style="
+              margin-right: 10px;
+              align-self: center;
+              zoom: 1.25;
+              color:var(--ion-color-primary);
+            "></ion-icon>
+              <b>{{ item.cost_total | currency:"Rp.":true:"1.0"}}</b>
+            </div>
+          </div>
+          <div class="flex flex-row">
+            <!-- <div class="flex flex-row" style="
+            align-self: center;
+            text-align: center;
+            margin-right: 10px;
+        ">
+              <ion-icon name="person" style="
+                margin-right: 10px;
+                align-self: center;
+                zoom: 1.25;
+                color:var(--ion-color-primary);
+              "></ion-icon>
+              <span>
+                <strong style="font-size: 1.25em;">{{ item.qty_total }}</strong>
+              </span>
+            </div> -->
+            <ion-icon [name]="item.expanded ? 'chevron-up-outline' : 'chevron-down-outline'" class="self-center">
+            </ion-icon>
+          </div>
+        </div>
+        <Accordion [expandHeight]="item.items.length * 100" [expanded]="item.expanded">
+          <ion-item *ngFor="let content of item.items">
+            <div class="flex flex-col" style="width:100%; margin:0.25em 0 0.25em 0">
+              <div class="global-text-regular">
+                <b>{{ content.jenis_pekerja }}</b>
+              </div>
+              <div class="flex flex-row" style="justify-content: space-between;">
+                <div class="flex flex-col">
+                  <div class="flex flex-row" style="padding:0.5rem 0 0.25rem 0">
+                    <ion-icon name="time-outline" style="
+                    margin-right: 10px;
+                    align-self: center;
+                    zoom: 1.1;
+                    color:var(--ion-color-secondary);
+                  "></ion-icon>
+                    <span>{{ content.day_multiplier }} hari {{ content.hour_multiplier }} jam</span>
+                  </div>
+                  <div class="flex flex-row" style="margin-bottom: 10px" *ngIf="app.auth.user.UserRoles[0].id !== 4 ">
+                    <ion-icon name="cash" style="
+                    margin-right: 10px;
+                    align-self: center;
+                    zoom: 1.1;
+                    color:var(--ion-color-secondary);
+                  "></ion-icon>
+                    <strong>{{ content.cost | currency:"Rp.":true:"1.0"}}</strong>
+                  </div>
+                  <div class="flex flex-col global-text-little-detail" style="margin-bottom: 5px"
+                    *ngIf="app.auth.user.UserRoles[0].id !== 4 ">
+                    <span>{{ content.harga | currency:"Rp.":true:"1.0"}} x {{ content.day_multiplier }} hari</span>
+                    <span>{{ content.harga_jam | currency:"Rp.":true:"1.0"}} x {{ content.hour_multiplier }} jam</span>
+                  </div>
+                </div>
+                <div class="flex flex-col">
+                  <div class="flex flex-row" style="
+                  align-self: center;
+                  text-align: center;
+              ">
+                    <ion-icon name="person" style="
+                      margin-right: 10px;
+                      align-self: center;
+                      zoom: 1;
+                      color:var(--ion-color-secondary);
+                    "></ion-icon>
+                    <span>
+                      <strong style="font-size: 1em;">{{ content.qty }}</strong>
+                    </span>
+                  </div>
+                  <div class="global-text-little-detail text-center" style="padding:0.25rem">
+                    Pekerja
+                  </div>
+                  <div class="flex flex-row" style="
+                  align-self: center;
+                  text-align: center;
+              ">
+                    <ion-icon name="people" style="
+                      margin-right: 10px;
+                      align-self: center;
+                      zoom: 1;
+                      color:var(--ion-color-dark);
+                    "></ion-icon>
+                    <span>
+                      <strong style="font-size: 1em;">{{ content.qty * content.day_multiplier }}</strong>
+                    </span>
+                  </div>
+                  <div class="global-text-little-detail" style="padding:0.25rem">
+                    Orang x hari
+                  </div>
+                </div>
+              </div>
+            </div>
+          </ion-item>
+        </Accordion>
+      </div>
+    </ion-card>
+  </div>
+  <div *ngIf="props.tabs.current === 'graph'">
+    <Charts [role]="app.auth.user.UserRoles[0].id" [chartProps]="chartProps" [data]="graphData"
+      [type]="'columnCompare'"></Charts>
+  </div>
+</ion-content>
+
+<ion-footer class="ion-padding" style="background-color:var(--ion-color-dark);"
+  *ngIf="props.tabs.enable && props.tabs.current === 'type'">
+  <div class="flex flex-col global-text-desc" style="color:white">
+    <div class="flex flex-row" style="justify-content: space-between; margin-bottom: 5px;">
+      <span>Total Biaya (Perencanaan)</span>
+      <b style="color:var(--ion-color-tertiary)">
+        {{ plannedCost | currency:"Rp.":true:"1.0"}}
+      </b>
+    </div>
+    <div class="flex flex-row" style="justify-content: space-between; margin-bottom: 5px;">
+      <span>Total Biaya (Realisasi)</span>
+      <b style="color:var(--ion-color-tertiary)">
+        {{ totalCost | currency:"Rp.":true:"1.0"}}
+      </b>
+    </div>
+    <!-- <div class="flex flex-row" style="justify-content: space-between; margin-bottom: 5px;">
+      <span>Total Pekerja</span>
+      <b style="color:var(--ion-color-tertiary)">
+        {{ totalWorker }}
+      </b>
+    </div> -->
+    <div class="flex flex-row" style="justify-content: space-between; margin-bottom: 5px;">
+      <span>Jumlah Pekerja x hari</span>
+      <b style="color:var(--ion-color-tertiary)">
+        {{ workerPerDay }}
+      </b>
+    </div>
+    <div class="flex flex-row" style="justify-content: space-between;">
+      <span>Total Orang x hari</span>
+      <b style="color:var(--ion-color-tertiary)">
+        {{ totalWorkerPerDay }}
+      </b>
+    </div>
+  </div>
+</ion-footer>
+
+<ion-footer *ngIf="props.tabs.enable && props.tabs.current === 'graph'">
+  <ion-toolbar mode="md">
+    <ion-segment mode="md" scrollable value="daily">
+      <ion-segment-button mode="md" value="daily" layout="icon-top" [ngClass]="tabTime === 'daily' ? 'highlight':''"
+        (click)="changeTime('daily')">
+        <ion-label>Daily</ion-label>
+      </ion-segment-button>
+      <ion-segment-button mode="md" value="weekly" layout="icon-top" [ngClass]="tabTime === 'weekly' ? 'highlight':''"
+        (click)="changeTime('weekly')">
+        <ion-label>Weekly</ion-label>
+      </ion-segment-button>
+      <ion-segment-button mode="md" value="monthly" layout="icon-top" [ngClass]="tabTime === 'monthly' ? 'highlight':''"
+        (click)="changeTime('monthly')">
+        <ion-label>Monthly</ion-label>
+      </ion-segment-button>
+    </ion-segment>
+  </ion-toolbar>
+</ion-footer>

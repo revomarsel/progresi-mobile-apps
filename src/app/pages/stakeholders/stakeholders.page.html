@@ -1,0 +1,67 @@
+<HeaderGlobal [props]="props" (event)="eventHandler($event)"></HeaderGlobal>
+<ion-toolbar *ngIf="props.search.enable" color="dark">
+  <ion-searchbar slot="start" [(ngModel)]="searchKey" (ionChange)="searchValue()" (ionClear)="cancelSearch()"
+    showCancelButton="focus" animated></ion-searchbar>
+</ion-toolbar>
+<Filter *ngIf="props.filter.enable" [props]="props.filter" (event)="eventHandler($event)"></Filter>
+<Tabs *ngIf="props.tabs.enable" [props]="props.tabs" (event)="eventHandler($event)"></Tabs>
+
+<ion-content>
+  <ion-refresher [disabled]="props.virtualScrollOptions.disablePullToRefresh" slot="fixed"
+    (ionRefresh)="ionRefresh($event)" (ionPull)="app.ionPull($event)" (ionStart)="app.ionStart($event)">
+    <ion-refresher-content pullingIcon="arrow-dropdown" pullingText="Pull to refresh" refreshingSpinner="circles"
+      refreshingText="Refreshing...">
+    </ion-refresher-content>
+  </ion-refresher>
+  <div class="center-item">
+    <ion-spinner [hidden]="isDataEmpty || (data && data.length > 0)" name="dots"></ion-spinner>
+    <div *ngIf="isDataEmpty && (data && data.length < 1)">-- NO DATA --</div>
+  </div>
+  <virtual-scroller #scroll [items]="data" (vsUpdate)="props.virtualScrollOptions.setState($event)">
+    <!-- <ion-item-sliding *ngFor="let item of scroll.viewPortItems"> -->
+    <ion-item *ngFor="let item of scroll.viewPortItems" class="bg-white">
+      <ion-avatar slot="start">
+        <img [src]="item.profile_picture ? item.profile_picture : 'assets/img/avatar.png'">
+      </ion-avatar>
+      <div class="flex flex-col w-full">
+        <div class="flex flex-row w-full item-list-padding">
+          <div style="width: 10%;" class="self-center">
+            <ion-icon name="person" color="primary"></ion-icon>
+          </div>
+          <div class="flex flex-col">
+            <div><b>{{item.name}}</b></div>
+            <div class="global-text-desc text-primary"><b>{{item.position}}</b></div>
+          </div>
+        </div>
+        <div class="flex flex-row w-full item-list-padding" style="padding-bottom:0.25rem">
+          <div style="width: 10%;" class="self-center">
+            <ion-icon name="phone-portrait" color="primary"></ion-icon>
+          </div>
+          <div class="flex flex-col">
+            <div class="global-text-desc">{{item.phone}}</div>
+          </div>
+        </div>
+        <div class="flex flex-row w-full item-list-padding" style="padding-top:0.25rem">
+          <div style="width: 10%;" class="self-center">
+            <ion-icon name="mail" color="primary"></ion-icon>
+          </div>
+          <div class="flex flex-col">
+            <div class="global-text-desc">{{item.email}}</div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <ion-icon name="ellipsis-vertical-outline" (click)="presentOptions($event, item)" size="large"></ion-icon>
+      </div>
+    </ion-item>
+    <!-- <ion-item-options>
+        <ion-item-option (click)="app.shareWhatsApp(item.phone)" style="width:70px; background-color:#25d366">
+          <ion-icon slot="end" name="logo-whatsapp" size="large"></ion-icon>
+        </ion-item-option>
+        <ion-item-option (click)="app.shareEmail(item.email)" style="width:70px" color="secondary">
+          <ion-icon slot="end" name="mail" size="large"></ion-icon>
+        </ion-item-option>
+      </ion-item-options>
+    </ion-item-sliding> -->
+  </virtual-scroller>
+</ion-content>

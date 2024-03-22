@@ -1,0 +1,67 @@
+<HeaderGlobal [props]="props" (event)="eventHandler($event)"></HeaderGlobal>
+
+<ion-content>
+  <div style="padding: 30px; display:flex; flex-direction: column; text-align: center; align-self:center !important;"
+    *ngIf="data">
+    <div style="align-self:center;">
+      <ion-avatar style="zoom:4; align-self:center; border: 1px solid var(--ion-color-secondary)">
+        <img [src]="profilePic">
+      </ion-avatar>
+      <div class="btn-image" 
+      style="position:absolute; zoom: 2;
+        border-radius: 50%;
+        width: 1.5em;
+        height: 1.5em;
+        transform: translate(270%, -110%)"
+        (click)="takePicture()">
+        <ion-icon slot="start" name="camera-outline" style="color:white; vertical-align: middle;"></ion-icon>
+      </div>
+    </div>
+    <div style="margin-bottom: 10px">
+      <div>
+        <h1 style="font-weight: 1000">{{data.username}}</h1>
+        <h3>{{data.email}}</h3>
+        <h4 style="color:var(--ion-color-tertiary)">{{data.position}}</h4>
+      </div>
+    </div>
+    <div class="form-spacer" style="display:flex; flex-direction:row;">
+      <div style="margin: auto; zoom:1.25; width: 10%; margin-right: 10px">
+        <ion-icon slot="start" name="person" style="color:var(--ion-color-primary)" class="icon-input-center">
+        </ion-icon>
+      </div>
+      <div style="display:flex; flex-direction:column; text-align: left; width: 85%">
+        <div>
+          Nama
+        </div>
+        <div>
+          <h4>{{data.name}}</h4>
+        </div>
+      </div>
+      <div style="margin: auto; zoom:1.25;">
+        <ion-icon slot="end" name="pencil" style="color:var(--ion-color-secondary)" class="icon-input-center"
+          (click)='postData("Silahkan masukkan nama anda", data.name, "name")'>
+        </ion-icon>
+      </div>
+    </div>
+    <hr style="background-color: var(--ion-color-dark); width: 90%; margin-right:0">
+    <div class="form-spacer" style="display:flex; flex-direction:row;">
+      <div style="margin: auto; zoom:1.25; width: 10%; margin-right: 10px">
+        <ion-icon slot="start" name="call" style="color:var(--ion-color-primary)" class="icon-input-center"></ion-icon>
+      </div>
+      <div style="display:flex; flex-direction:column; text-align: left; width: 85%">
+        <div>
+          No. HP
+        </div>
+        <div>
+          <h4>{{data.phone}}</h4>
+        </div>
+      </div>
+      <div style="margin: auto; zoom:1.25;">
+        <ion-icon slot="end" name="pencil" style="color:var(--ion-color-secondary)" class="icon-input-center"
+          (click)='postData("Silahkan masukkan nomor HP", data.phone, "phone")'>
+        </ion-icon>
+      </div>
+    </div>
+    <hr style="background-color: var(--ion-color-dark); width: 90%; margin-right:0">
+  </div>
+</ion-content>

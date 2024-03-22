@@ -1,0 +1,67 @@
+<ion-header>
+  <ion-toolbar color="primary" *ngIf="loading">
+    <div class="flex" style="flex-direction: row-reverse;" *ngIf="!isViewMode">
+      <ion-buttons slot="start">
+        <ion-button size="small" shape="round" (click)="closeModal()" color="tertiary">
+          <ion-icon slot="start" name="checkmark"></ion-icon> Done
+        </ion-button>
+      </ion-buttons>
+    </div>
+    <div *ngIf="isViewMode">
+      <ion-buttons slot="start">
+        <ion-button size="small" shape="round" (click)="closeModal()" color="tertiary">
+          <ion-icon slot="start" name="close"></ion-icon> {{title}} {{date | date:'dd MMM yyyy'}}
+        </ion-button>
+      </ion-buttons>
+    </div>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <div *ngIf="!data || !data.data || data.data.length < 1" class="center-item">--NO DATA--</div>
+  <div style="padding:1rem" *ngIf="!isViewMode">
+    <ion-button size="medium" expand="full" expand="block" color="secondary" (click)="takePicture()"
+      style="margin-top: 20px;">
+      <ion-icon name="camera"></ion-icon>
+      &nbsp;Upload Foto
+    </ion-button>
+  </div>
+  <div *ngIf="data && data.data">
+    <ion-list *ngFor="let item of data.data; let i = index">
+      <ion-card class="flex flex-col" style="margin: 0.5rem 1.25rem 0.5rem 1.25rem; max-height: 500px;">
+        <img [src]="item.file ? item.file : 
+        item.url ? getRepoImage(item.url) :
+        item.img_url ? getRepoImage(item.img_url) :
+        '/assets/img/img-empty.png'" *ngIf="loading" style="max-height: 300px;">
+        <div style="position: absolute;top:0;right:0; padding:0.75rem;">
+          <div *ngIf="!isViewMode" (click)="deleteData(i, item.id)"
+            style="background:white; padding:0.35rem; border-radius: 50%; color:red; zoom:1.25; opacity:0.5; height: 25px; width: 25px;">
+            <ion-icon name="close"></ion-icon>
+          </div>
+        </div>
+        <div style="height: 6rem; padding: 0.5rem; max-height: 500px;">
+          <div *ngIf="!isViewMode"
+            style="position: absolute;bottom:0;right:0; padding:0.5rem; color:var(--ion-color-primary)">
+            <ion-icon name="pencil"></ion-icon>
+          </div>
+          <div class="text-line global-text-desc" style="height:5rem; padding: 0.5rem;">
+            <textarea *ngIf="!isViewMode" class="w-full h-full" style="border:none" [(ngModel)]="item.info"></textarea>
+            <textarea *ngIf="isViewMode" class="w-full h-full" style="border:none" [(ngModel)]="item.info"
+              readonly></textarea>
+          </div>
+        </div>
+      </ion-card>
+    </ion-list>
+  </div>
+</ion-content>
+
+<!-- <ion-slides [options]="sliderOpts" zoom>
+  <ion-slide>
+      <div class="swiper-zoom-container" style="min-height: 225px;">
+          <img [src]="data[selectedMediaIdx].file ? data[selectedMediaIdx].file : 
+              data[selectedMediaIdx].url ? getRepoImage(data[selectedMediaIdx].url) :
+              '/assets/img/img-empty.png' 
+          ">
+      </div>
+  </ion-slide>
+</ion-slides> -->

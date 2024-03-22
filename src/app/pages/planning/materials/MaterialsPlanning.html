@@ -1,0 +1,140 @@
+<HeaderGlobal [props]="props" (event)="eventHandler($event)"></HeaderGlobal>
+<ion-toolbar *ngIf="detail" color="dark">
+  <div class="flex flex-row w-full" style="padding: 0.25rem">
+    <div class="flex flex-col w-full">
+      <b>{{detail.project_name}}</b>
+      <div class="global-text-desc">{{detail.baseline_name}}</div>
+      <div class="global-text-little-detail text-right" style="color:var(--ion-color-tertiary)">
+        <ion-icon name="calendar"></ion-icon>&nbsp;{{detail.start_date | date:'dd MMM yyyy'}} - {{detail.end_date | date:'dd MMM yyyy'}}
+      </div>
+    </div>
+  </div>
+</ion-toolbar>
+<ion-toolbar style="border: 1px solid lightgrey; margin-bottom: 0.25rem;">
+  <div class="flex flex-row">
+    <div class="global-text-desc self-center" style="
+      padding: 0 0.5rem 0 0.5rem; 
+      color: var(--ion-color-primary); 
+      border-right: 1px solid lightgrey;
+    ">
+      <strong>Group by</strong>
+    </div>
+    <div>
+      <ion-segment scrollable class="segment-light" style="border-radius: 0px;">
+        <ion-segment-button *ngFor="let item of groupingList" class="segment-btn-light" [ngStyle]="{
+          'color':groupByOption === item ? 'var(--ion-color-tertiary)' : 'var(--ion-color-dark)'
+        }" (click)="changeViewGrouping(item)">
+          {{item.toUpperCase()}}
+        </ion-segment-button>
+      </ion-segment>
+    </div>
+  </div>
+</ion-toolbar>
+<ion-toolbar *ngIf="props.search.enable">
+  <!-- Task Search -->
+  <ion-searchbar slot="start" [(ngModel)]="searchKey" (ionChange)="searchValue('task')" (ionClear)="cancelSearch()"
+    showCancelButton="focus" animated *ngIf="groupByOption === 'task'" placeholder="Search Task"></ion-searchbar>
+  <!-- Material Search -->
+  <ion-searchbar slot="start" [(ngModel)]="searchKey" (ionChange)="searchValue('material')" (ionClear)="cancelSearch()"
+    showCancelButton="focus" animated *ngIf="groupByOption === 'material'" placeholder="Search Material">
+  </ion-searchbar>
+  <!-- Date search -->
+  <div class="flex flex-row w-full" *ngIf="groupByOption === 'date'" style="padding: 0 1rem 0 1rem;">
+    <div class="w-half flex flex-row global-text-desc">
+      <b class="self-center" style="color: var(--ion-color-primary);">Dari</b>
+      <ion-datetime displayFormat="DD MMM YYYY" placeholder="Tanggal" (ionChange)="setMinDateRange($event)" [min]="detail.start_date" [max]="detail.end_date">
+      </ion-datetime>
+    </div>
+    <div class="w-half flex flex-row global-text-desc">
+      <b class="self-center" style="color: var(--ion-color-primary);">Hingga</b>
+      <ion-datetime displayFormat="DD MMM YYYY" placeholder="Tanggal" (ionChange)="setMaxDateRange($event)" [min]="detail.start_date" [max]="detail.end_date">
+      </ion-datetime>
+    </div>
+  </div>
+</ion-toolbar>
+
+<ion-content [scrollEvents]="true" (ionScroll)="app.atScrollEnd($event, endScrollFunc)">
+  <ion-refresher slot="fixed"
+    (ionRefresh)="ionRefresh($event)" (ionPull)="app.ionPull($event)" (ionStart)="app.ionStart($event)">
+    <ion-refresher-content pullingIcon="arrow-dropdown" pullingText="Pull to refresh" refreshingSpinner="circles"
+      refreshingText="Refreshing...">
+    </ion-refresher-content>
+  </ion-refresher>
+  <div class="center-item">
+    <ion-spinner [hidden]="isDataEmpty || (data && data.length > 0) || !isLoading" name="dots"></ion-spinner>
+    <div *ngIf="isDataEmpty && (dataView && dataView.length < 1)">-- NO DATA --</div>
+  </div>
+    <ion-card *ngFor="let item of dataView" class="ion-padding" (click)="item.expanded = !item.expanded">
+      <div class="flex flex-row w-full justify-between">
+        <div class="global-text-regular flex flex-col w-full">
+          <div>
+            <div *ngIf="groupByOption === 'task'" class="flex flex-col">
+              <strong style="padding-bottom: 0.2rem;">{{item.key}}</strong>
+              <span class="global-text-desc">{{item.key_secondary}}</span>
+            </div>
+            <strong *ngIf="groupByOption === 'material'">{{item.key}}</strong>
+            <strong *ngIf="groupByOption === 'date'">{{item.key | date:'dd MMM yyyy'}}</strong>
+          </div>
+          <div class="flex flex-row w-full justify-between" style="margin-top: 0.5rem">
+            <div class="flex flex-col dim-text global-text-desc">
+              <div *ngIf="groupByOption === 'material'" class="text-spacer-v-sm">Volume Total</div>
+              <div *ngIf="groupByOption === 'material'" class="text-spacer-v-sm">Harga</div>
+              <div class="text-spacer-v-sm">Harga Total</div>
+            </div>
+            <div class="flex flex-col global-text-desc" style="text-align: right;">
+              <div *ngIf="groupByOption === 'material'" class="text-spacer-v-sm"><b>{{item.totalVolume}}</b>
+                {{item.materialUnit}}</div>
+              <div *ngIf="groupByOption === 'material'" class="text-spacer-v-sm"><b>{{item.materialPrice | currency:"Rp.
+                  ":true:"1.0"}}</b></div>
+              <div class="text-spacer-v-sm"><b>{{item.totalCost | currency:"Rp. ":true:"1.0"}}</b></div>
+            </div>
+          </div>
+        </div>
+        <div class="self-center" style="margin:0 0 0 0.5rem">
+          <ion-icon [name]="item.expanded ? 'chevron-up-outline' : 'chevron-down-outline'"></ion-icon>
+        </div>
+      </div>
+      <Accordion expandHeight="item.items.length * 100" [expanded]="item.expanded">
+        <div *ngFor="let content of item.items" class="global-text-desc"
+          style="margin:0.5rem 0 0.5rem 0; color: black; padding-left: 0.75rem">
+          <div class="flex flex-row w-full justify-between" style="margin-bottom: 0.5rem;">
+            <div class="flex flex-col global-text-regular" style="width: 70%;">
+              <div style="padding-bottom: 0.2rem;"><b>{{content.material}}</b></div>
+              <div class="flex flex-col">
+                <span class="global-text-desc">{{content.parent_task}}</span>
+                <span class="global-text-little-detail">{{content.task_name}}</span>
+              </div>
+            </div>
+            <div class="self-center global-text-little-detail">
+              <ion-icon name="calendar"></ion-icon>&nbsp;{{content.mob_date | date:'dd MMM yyyy'}} 
+              {{content.demob_date | date:'dd MMM yyyy'}}
+            </div>
+          </div>
+          <div class="flex flex-row w-full justify-between">
+            <div class="flex flex-col dim-text">
+              <div class="text-spacer-v-sm">Volume</div>
+              <div class="text-spacer-v-sm">Harga</div>
+              <div class="text-spacer-v-sm">Harga Total</div>
+            </div>
+            <div class="flex flex-col" style="text-align: right;">
+              <div class="text-spacer-v-sm"><b>{{content.qty}}</b> {{content.unit}}</div>
+              <div class="text-spacer-v-sm"><b>{{content.price | currency:"Rp. ":true:"1.0"}}</b></div>
+              <div class="text-spacer-v-sm"><b>{{content.price * content.qty | currency:"Rp. ":true:"1.0"}}</b></div>
+            </div>
+          </div>
+          <div class="hr"></div>
+        </div>
+      </Accordion>
+    </ion-card>
+</ion-content>
+
+<ion-footer style="background-color:var(--ion-color-dark);padding:0.25rem 1rem 0.25rem 1rem;">
+  <div class="flex flex-col" style="color:white">
+    <div class="flex flex-row justify-between w-full">
+      <span class="global-text-desc self-center">Grand Total</span>
+      <span style="color:var(--ion-color-tertiary)" class="global-text-regular">
+        {{ grandTotal | currency:"Rp.":true:"1.0"}}
+      </span>
+    </div>
+  </div>
+</ion-footer>

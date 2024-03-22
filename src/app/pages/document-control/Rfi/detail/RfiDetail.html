@@ -1,0 +1,373 @@
+<HeaderGlobal [props]="props"></HeaderGlobal>
+<Tabs
+  *ngIf="props.tabs.enable"
+  [props]="props.tabs"
+  (event)="eventHandler($event)"
+></Tabs>
+<ion-content class="bg-white p-2">
+  <ion-refresher
+    [disabled]="props.virtualScrollOptions.disablePullToRefresh"
+    slot="fixed"
+    (ionRefresh)="ionRefresh($event)"
+    (ionPull)="app.ionPull($event)"
+    (ionStart)="app.ionStart($event)"
+  >
+    <ion-refresher-content
+      pullingIcon="arrow-dropdown"
+      pullingText="Pull to refresh"
+      refreshingSpinner="circles"
+      refreshingText="Refreshing..."
+    >
+    </ion-refresher-content>
+  </ion-refresher>
+  <div class="center-item bg-white" *ngIf="isDataEmpty">
+    <ion-spinner [hidden]="isDataEmpty" name="dots"></ion-spinner>
+  </div>
+  <div>
+    <div
+      class="btn {{status.class}} w-100 d-flex align-items-center text-left p-2"
+    >
+      <ion-icon
+        name="notifications-outline"
+        class="font-size-25 pr-2"
+      ></ion-icon>
+      <p class="my-0 font-size-12">
+        <span class="font-weight-bold font-size-12">{{status.title}}</span>
+        <br />
+        {{status.desc}}
+      </p>
+    </div>
+  </div>
+  <div *ngIf="tab == 'Info Umum'">
+    <ion-card class="bg-white">
+      <div
+        class="bgCard"
+        [ngStyle]="{'background-image':'linear-gradient(100deg, #000000d6 0%, #00000054 110%),url('+fileUrl(master.image)+')'}"
+      >
+        <div class="titleCardRight w-100"></div>
+        <div class="w-100 baseTitleCard">
+          <b class="titleCard"> {{master.proyek_name}} </b>
+        </div>
+      </div>
+      <ion-card-content class="p-2 m-0">
+        <table class="text-capitalize w-100">
+          <tbody>
+            <tr>
+              <td class="w-25">Judul</td>
+              <td class="w-5">:</td>
+              <td>{{master.judul}}</td>
+            </tr>
+            <tr>
+              <td>No</td>
+              <td>:</td>
+              <td>{{master.no}}</td>
+            </tr>
+            <tr>
+              <td>Dibuat</td>
+              <td>:</td>
+              <td>{{master.created_by}}</td>
+            </tr>
+            <tr>
+              <td>Deadline</td>
+              <td>:</td>
+              <td>
+                <b class="text-warning"> {{master.due_date}}</b>
+              </td>
+            </tr>
+            <tr *ngIf="master.over_due" class="text-danger">
+              <td><b> Overdue </b></td>
+              <td>:</td>
+              <td>
+                <b> {{master.over_due}} Hari</b>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <h5 class="my-2 font-size-16"><b>Keterangan :</b></h5>
+        <div [innerHTML]="master.content"></div>
+      </ion-card-content>
+    </ion-card>
+    <ion-card class="bg-white mb-6">
+      <ion-card-content class="p-2 m-0">
+        <h5 class="font-size-16 d-flex align-items-center text-left my-2 ml-2">
+          <ion-icon
+            name="briefcase-outline"
+            color="primary"
+            class="pr-2 font-size-25"
+          ></ion-icon>
+          <b>Tertanda Untuk Task</b>
+        </h5>
+        <table class="text-capitalize w-100">
+          <tbody>
+            <tr class="font-size-14">
+              <td><b>Task Code</b></td>
+              <td><b>Task Name</b></td>
+            </tr>
+            <tr *ngFor="let itemTask of task" class="font-size-13">
+              <td>
+                <div *ngIf="itemTask.parrent_id">{{itemTask.parrent_id}}</div>
+                {{itemTask.task}}
+              </td>
+              <td>
+                <div *ngIf="itemTask.parrent_id">
+                  {{itemTask.parrent_name}}
+                  <div class="pl-2">{{itemTask.task_name}}</div>
+                </div>
+                <div *ngIf="!itemTask.parrent_id">{{itemTask.task_name}}</div>
+              </td>
+            </tr>
+            <tr></tr>
+          </tbody>
+        </table>
+      </ion-card-content>
+    </ion-card>
+  </div>
+  <div *ngIf="tab == 'Akses Dokument'">
+    <ion-card class="bg-white">
+      <ion-card-content class="p-2 m-0">
+        <div *ngFor="let menu of menus; let i = index">
+          <div
+            class="bg-white"
+            style="border-radius: 20px"
+            (click)="menu.onClick()"
+          >
+            <div
+              class="flex flex-col w-full"
+              style="padding: 0.2rem 0.5rem 0.2rem 0"
+            >
+              <div
+                class="flex flex-row w-full justify-between global-text-regular px-2"
+              >
+                <div class="flex flex-row flex-start">
+                  <ion-icon
+                    [name]="menu.icon"
+                    color="primary"
+                    class="pr-2 font-size-25"
+                  ></ion-icon>
+                  <strong style="padding-left: 0.2rem">{{menu.title}}</strong>
+                </div>
+                <div class="pt-1">
+                  <ion-icon
+                    [name]="menu.isNav ? 'chevron-forward-outline' : menu.expanded ? 'chevron-up-outline' : 'chevron-down-outline'"
+                  ></ion-icon>
+                </div>
+              </div>
+              <Accordion expandHeight="300px" [expanded]="menu.expanded">
+                <div class="mt-2" *ngIf="assigne.length > 0">
+                  <table class="text-capitalize w-100">
+                    <tbody>
+                      <tr>
+                        <td><b>Role</b></td>
+                        <td><b>Username</b></td>
+                      </tr>
+                      <tr *ngFor="let itemAs of assigne">
+                        <td>{{itemAs.access}}</td>
+                        <td>{{itemAs.user}}</td>
+                      </tr>
+                      <tr></tr>
+                    </tbody>
+                  </table>
+                </div>
+                <div class="my-4 text-center" *ngIf="assigne.length == 0">
+                  <ion-icon
+                    name="folder-open-outline"
+                    class="font-size-30"
+                  ></ion-icon>
+                  <p>Data Kosong !</p>
+                </div>
+              </Accordion>
+            </div>
+          </div>
+        </div>
+      </ion-card-content>
+    </ion-card>
+    <ion-card class="bg-white mb-8">
+      <ion-card-content class="p-2 m-0">
+        <div *ngFor="let taskItem of menuTask">
+          <div
+            class="bg-white"
+            style="border-radius: 20px"
+            (click)="taskItem.onClick()"
+          >
+            <div
+              class="flex flex-col w-full"
+              style="padding: 0.2rem 0.5rem 0.2rem 0"
+            >
+              <div
+                class="flex flex-row w-full justify-between global-text-regular px-2"
+              >
+                <div class="flex flex-row flex-start">
+                  <ion-icon
+                    [name]="taskItem.icon"
+                    color="primary"
+                    class="pr-2 font-size-25"
+                  ></ion-icon>
+                  <strong style="padding-left: 0.2rem"
+                    >{{taskItem.title}}</strong
+                  >
+                </div>
+                <div class="pt-1">
+                  <ion-icon
+                    [name]="taskItem.isNav ? 'chevron-forward-outline' : taskItem.expanded ? 'chevron-up-outline' : 'chevron-down-outline'"
+                  ></ion-icon>
+                </div>
+              </div>
+              <Accordion expandHeight="300px" [expanded]="taskItem.expanded">
+                <div class="mt-2" *ngIf="dokument.length > 0">
+                  <div class="actionBox py-0">
+                    <ul class="commentList mb-2">
+                      <!---->
+                      <li *ngFor="let itemDoc of dokument">
+                        <div class="commenterImage">
+                          <img
+                            src="https://d3v.progresi.co.id/assets/images/blank.png"
+                          />
+                        </div>
+                        <div class="commentText">
+                          <div style="display: inline-block; width: 85%">
+                            <b>{{itemDoc.user}}</b>
+                            <span
+                              class="date sub-text float-right font-size-13"
+                            >
+                              {{alpro.dateFormat(itemDoc.created_date,'d-m-Y')
+                              }}
+                            </span>
+                          </div>
+                          <p class="">{{itemDoc.description}}</p>
+                          <div class="w-100 text-right py-1">
+                            <a
+                              class="btn btn-primary btn-primary-border font-size-12 mr-2"
+                              href="/index.php?r=documentcontrol/generate&amp;id=52&amp;type=rfi"
+                            >
+                              Online Update</a
+                            >
+                            <a
+                              (click)="app.downloadFile(fileUrl(itemDoc.doc_url))"
+                              class="btn btn-primary font-size-12"
+                              >Download Doc V.{{itemDoc.version}}</a
+                            >
+                          </div>
+                        </div>
+                      </li>
+                    </ul>
+                    <div></div>
+                  </div>
+                </div>
+
+                <div class="my-4 text-center" *ngIf="dokument.length == 0">
+                  <ion-icon
+                    name="folder-open-outline"
+                    class="font-size-30"
+                  ></ion-icon>
+                  <p>Data Kosong !</p>
+                </div>
+              </Accordion>
+            </div>
+          </div>
+        </div>
+      </ion-card-content>
+    </ion-card>
+  </div>
+  <div id="footer" *ngIf="tab == 'Info Umum'">
+    <ion-row *ngIf="master.status == 'Open'">
+      <ion-col class="w-100 bg-white">
+        <button
+          ion-button
+          (click)="changeStatus()"
+          class="btn btn-danger w-100 font-size-12 font-weight-bold p-2"
+        >
+          Close Dokument
+        </button>
+      </ion-col>
+    </ion-row>
+  </div>
+  <div id="footer" class="bg-white" *ngIf="tab == 'Akses Dokument'">
+    <div *ngIf="showForm">
+      <div class="d-flex mt-3 ml-2 mr-3">
+        <h5 class="w-50 font-size-16 mb-0 mt-2">
+          <b>Keterangan :</b>
+        </h5>
+        <div class="w-50 text-right">
+          <a
+            class="font-size-20"
+            ion-button
+            (click)="actionShowHideForm(false)"
+          >
+            <ion-icon name="close-outline"></ion-icon>
+          </a>
+        </div>
+      </div>
+      <ion-textarea
+        [(ngModel)]="dataRevise.keterangan"
+        class="textcolor-dark textarea mx-2 mt-2"
+        placeholder="Input disini"
+      ></ion-textarea>
+      <div *ngIf="fileAsli" class="mt-1 pl-2 font-size-12">
+        File : {{fileAsli.split("\\").pop()}}
+      </div>
+      <input
+        type="file"
+        accept="pdf/*"
+        [(ngModel)]="fileAsli"
+        (change)="handleFileSelect($event)"
+        id="upload-file"
+      />
+      <ion-row>
+        <ion-col>
+          <label
+            for="upload-file"
+            class="btn btn-primary w-100 d-block text-center font-size-12 font-weight-bold p-2 m-0"
+          >
+            Lampirkan File
+          </label>
+        </ion-col>
+        <ion-col class="bg-white">
+          <form (ngSubmit)="submit()">
+            <button
+              ion-button
+              type="submit"
+              class="btn btn-primary w-100 font-size-12 font-weight-bold p-2 m-0"
+            >
+              <div style="padding-top: 2px">Kirim Revisi</div>
+            </button>
+          </form>
+        </ion-col>
+      </ion-row>
+    </div>
+    <div *ngIf="!showForm">
+      <div class="d-flex align-items-center text-left mx-2 mt-2">
+        <ion-icon
+          name="cloud-download-outline"
+          class="font-size-30 mr-3 ml-3"
+        ></ion-icon>
+        <p class="mb-0 mx-1 mt-0 p-normal font-size-13">
+          Sebagai Standart Review <b>RFI</b>, <br />
+          Gunakan Dokument Versi Terbaru ! <br />
+          <a (click)="app.downloadFile(fileUrl(master.document))"
+            >Unduh Master Dokument</a
+          >
+        </p>
+      </div>
+      <ion-row>
+        <ion-col class="pl-2">
+          <button
+            ion-button
+            (click)="detailDocumentControl(13)"
+            class="btn btn-primary w-100 font-size-12 font-weight-bold p-2"
+          >
+            Online Update
+          </button>
+        </ion-col>
+        <ion-col class="pr-2">
+          <button
+            ion-button
+            (click)="actionShowHideForm(true)"
+            class="btn btn-primary w-100 font-size-12 font-weight-bold p-2"
+          >
+            Lampirkan File
+          </button>
+        </ion-col>
+      </ion-row>
+    </div>
+  </div>
+</ion-content>

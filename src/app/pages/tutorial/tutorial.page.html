@@ -1,0 +1,41 @@
+<ion-header no-border>
+  <ion-toolbar>
+    <ion-buttons slot="end">
+      <ion-button color='primary' (click)="startApp()" [hidden]="!showSkip">Skip</ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <ion-slides #slides pager="true">
+    <ion-slide>
+      <img src="assets/img/progresi-quote.png" class="slide-image" />
+      <h2 class="slide-title">
+        Selamat datang di
+        <i><b>PROGRESI</b></i>
+      </h2>
+    </ion-slide>
+
+    <ion-slide>
+      <img src="assets/icon/general-contractor.png" class="slide-image" />
+      <h2 class="slide-title">Bagaimana <i><b>PROGRESI</b></i> dapat membantu anda?</h2>
+      <p style="text-align: justify;">
+        <b>PROGRESI</b> menfasilitasi perencanaan dan monitor proyek
+        secara real time berbasis data, visual, dan analisa yang terintegrasi
+        dengan semua stakeholder untuk mengukur parameter penting proyek, yaitu: <b>biaya, mutu, waktu, dan K3</b>
+      </p>
+      <a class="tutorial-link" href="https://progresi.co.id/features/">Learn More</a>
+    </ion-slide>
+
+    <ion-slide>
+      <img src="assets/img/tutorial-daily.png" class="slide-image" />
+      <h2 class="slide-title">Siap berkolaborasi dengan kami?</h2>
+      <p>
+        Mari melangkah bersama menuju era <b>konstruksi 4.0</b>
+      </p>
+      <div (click)="startApp()">
+        <b class="tutorial-link dead-center">Continue&nbsp;<ion-icon slot="end" name="arrow-forward"></ion-icon></b>
+      </div>
+    </ion-slide>
+  </ion-slides>
+</ion-content>

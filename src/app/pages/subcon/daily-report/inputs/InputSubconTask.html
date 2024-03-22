@@ -1,0 +1,209 @@
+<HeaderGlobal [props]="props" (event)="eventHandler($event)"></HeaderGlobal>
+
+<ion-content>
+    <div *ngIf="!expandNavigator" style="
+        height: 70%;
+        overflow-y: scroll;
+        position: relative;
+    ">
+        <div style="
+            position:absolute; 
+            background-color: white;
+        ">
+            <div style="padding: 30px;" *ngIf="data && data.length > 0">
+                <div class="flex flex-row" style="margin:0 0 1rem 0">
+                    <span class="textcolor-dark self-center" style="width: 80%;">
+                        <strong>Jumlah Pekerja</strong>
+                    </span>
+                    <ion-item class="ion-no-padding" style="text-align: right;">
+                        <ion-input type="text" [(ngModel)]="worker" [disabled]="data[selectedTaskIdx].status_name === 'Disetujui'">
+                        </ion-input>
+                    </ion-item>
+                </div>
+                <div style="max-width: 85vw;">
+                    <span class="textcolor-dark"><strong>Task</strong></span>
+                    <ion-item style="margin-bottom: 20px;" class="ion-no-padding">
+                        <ionic-selectable [(ngModel)]="selectedTask" [items]="tasks"
+                            [disabled]="data[selectedTaskIdx].status_name === 'Disetujui'" itemValueField="task_id"
+                            itemTextField="task_name" groupValueField="task_parent" groupTextField="task_parent"
+                            [canSearch]="true" (onChange)="changeTask($event)" placeholder="Task yang dikerjakan">
+                            <ng-template ionicSelectableTitleTemplate>Daftar Task</ng-template>
+                            <ng-template ionicSelectableItemTemplate let-task="item">
+                                <p class="text-ellipsis">{{task.task_name}}<br>
+                                    <span style="color:grey;">{{task.qty}} {{task.unit}}</span>
+                                </p>
+                            </ng-template>
+                        </ionic-selectable>
+                    </ion-item>
+                </div>
+                <div class="flex flex-col w-full">
+                    <div class="flex flex-row justify-between" style="margin: 0.2rem 0 0.2rem 0">
+                        <span>Qty</span>
+                        <strong>{{data[selectedTaskIdx].qty }} {{data[selectedTaskIdx].unit}}</strong>
+                    </div>
+                    <div class="flex flex-row justify-between" style="margin: 0.2rem 0 0.2rem 0">
+                        <span>Harga Satuan</span>
+                        <strong>{{data[selectedTaskIdx].price | currency:"Rp. ":true:"1.0"}}</strong>
+                    </div>
+                    <div class="flex flex-row justify-between" style="margin: 0.2rem 0 0.2rem 0">
+                        <span>Jumlah Harga</span>
+                        <strong>{{data[selectedTaskIdx].total_price | currency:"Rp. ":true:"1.0"}}</strong>
+                    </div>
+                </div>
+                <div style="margin-bottom: 10px" class="flex flex-row justify-between">
+                    <div style="width: 45%;" class="flex flex-col">
+                        <ion-item style="margin-bottom: 10px;" class="ion-no-padding">
+                            <ion-input type="number" [(ngModel)]="data[selectedTaskIdx].capaian"
+                                (ionChange)="calculateProgress()" [disabled]="data[selectedTaskIdx].status_name === 'Disetujui'" class="global-text-title">
+                            </ion-input>
+                            {{data[selectedTaskIdx].unit}}
+                        </ion-item>
+                        <span class="global-text-regular">Capaian hari ini</span>
+                    </div>
+                    <span class="text-emphasize-big"
+                        style="align-self:center; margin:auto; color:var(--ion-color-primary);">
+                        {{!data[selectedTaskIdx].weight ? 0 : data[selectedTaskIdx].weight | number:'0.0-2'}}
+                        <span class="text-support">%</span>
+                    </span>
+                </div>
+                <div style="margin:1rem 0 1rem 0">
+                    <span class="textcolor-dark"><strong>Info</strong></span>
+                    <ion-item style="margin-bottom: 10px;" class="ion-no-padding">
+                        <ion-input type="text" [(ngModel)]="data[selectedTaskIdx].info" [disabled]="data[selectedTaskIdx].status_name === 'Disetujui'">
+                        </ion-input>
+                    </ion-item>
+                </div>
+                <div class="flex flex-col w-full" style="margin:0 0 1.5rem 0">
+                    <div class="flex flex-row justify-between">
+                        <div class="flex flex-col items-center w-full">
+                            <span>
+                                <strong class="text-emphasize-med">{{data[selectedTaskIdx].capaian_cum |
+                                    number:'0.0-2'}}
+                                </strong> {{data[selectedTaskIdx].unit}}
+                            </span>
+                            <span class="global-text-regular text-center">Capaian kumulatif</span>
+                        </div>
+                        <div class="flex flex-col items-center w-full">
+                            <span>
+                                <strong class="text-emphasize-med">{{data[selectedTaskIdx].weight_total |
+                                    number:'0.0-2'}}
+                                </strong> %
+                            </span>
+                            <span class="global-text-regular text-center">Bobot total</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex flex-col w-full" style="margin:0 0 1.5rem 0">
+                    <div class="flex flex-row justify-between">
+                        <div class="flex flex-col items-center w-full">
+                            <span>
+                                <strong class="text-emphasize-med">{{!data[selectedTaskIdx].prev_cum ? 0 :
+                                    data[selectedTaskIdx].prev_cum |
+                                    number:'0.0-2'}}</strong> {{data[selectedTaskIdx].unit}}
+                            </span>
+                            <span class="global-text-regular text-center">Capaian sebelumnya</span>
+                        </div>
+                        <div class="flex flex-col items-center w-full">
+                            <span>
+                                <strong class="text-emphasize-med">{{!data[selectedTaskIdx].prev_weight ? 0 :
+                                    data[selectedTaskIdx].prev_weight |
+                                    number:'0.0-2'}}</strong> %
+                            </span>
+                            <span class="global-text-regular text-center">Bobot sebelumnya</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex flex-col w-full" style="margin:0.5rem 0 1.5rem 0">
+                    <div class="flex flex-row justify-between" style="margin: 0.2rem 0 0.2rem 0">
+                        <span>Submitted</span>
+                        <span>{{!data[selectedTaskIdx].submitted_time ? '-' : data[selectedTaskIdx].submitted_time |
+                            date:'dd MMM yyyy HH:mm:ss'}}</span>
+                    </div>
+                    <div class="flex flex-row justify-between" style="margin: 0.2rem 0 0.2rem 0">
+                        <span>Direvisi</span>
+                        <span>{{!data[selectedTaskIdx].revised_time ? '-' : data[selectedTaskIdx].revised_time |
+                            date:'dd MMM yyyy HH:mm:ss'}}</span>
+                    </div>
+                    <div class="flex flex-row justify-between" style="margin: 0.2rem 0 0.2rem 0">
+                        <span>Disetujui</span>
+                        <span>{{!data[selectedTaskIdx].approved_time ? '-' : data[selectedTaskIdx].approved_time |
+                            date:'dd MMM yyyy HH:mm:ss'}}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="input-item-navigator">
+        <div style="width:85%">
+            <p style="color:white">Pekerjaan di {{day}}</p>
+        </div>
+        <div class="flex flex-row" style="width:15%; justify-content: space-between;">
+            <ion-icon name="search-sharp" [ngStyle]="
+                {
+                    'color': showQuickNav ? 'var(--ion-color-tertiary)' : 'white',
+                    'zoom' : 1.25
+                }" (click)="showQuickNav = !showQuickNav">
+            </ion-icon>
+            <ion-icon [name]="!expandNavigator ? 'chevron-up-sharp' : 'chevron-down-sharp'"
+                style="color:var(--ion-color-tertiary); zoom:1.25" (click)="expandNavigator = !expandNavigator">
+            </ion-icon>
+        </div>
+    </div>
+    <div *ngIf="data && data.length > 0" [ngStyle]="
+        {
+            'height': !expandNavigator ? '25%' : '95%',
+            'position': 'relative',
+            'overflow-y': 'scroll'
+        }
+    ">
+        <div style="
+            position: absolute;
+            width: 100%;
+        ">
+            <ion-toolbar mode="md" color="dark" style="padding: 0 1rem 0 1rem;" *ngIf="showQuickNav">
+                <ionic-selectable #quickNavSelection [items]="data" itemValueField="task_id" itemTextField="task_name"
+                    [canSearch]="true" (onChange)="quickNavigation($event)" placeholder="*Click Untuk Tampilkan Semua Task">
+                    <ng-template ionicSelectableTitleTemplate>Daftar Task</ng-template>
+                    <ng-template ionicSelectableItemTemplate let-task="item">
+                        <p class="text-ellipsis">{{task.task_name}}<br><span style="color:grey;">{{task.qty}}
+                                {{task.unit}}</span></p>
+                    </ng-template>
+                </ionic-selectable>
+            </ion-toolbar>
+            <ion-item *ngFor="let item of data; let idx = index" [ngStyle]="
+                {
+                    'padding': '5px 0px 0px 0px',
+                    'min-height' : '50px',
+                    'background-color': selectedTaskIdx === idx ? 'var(--ion-color-tertiary)' : 
+                    ( data[idx].completion === null || !data[idx].task_id ) ? 'grey' : 
+                    item.is_today ? '#e6ffc9' : ''
+                }
+                " (click)="changeSelectedTask(idx)">
+                <div style="width: 95%; display: flex; flex-direction: row;">
+                    <div style="width: 5%; align-self: center;">
+                        {{idx + 1}}.
+                    </div>
+                    <div style="display: flex; flex-direction: column; width: 90%;">
+                        <b>{{item.task_name ? item.task_name + ' (' + item.qty + ' ' + item.unit + ') ' : '-'}}</b>
+                        <span [ngStyle]="
+                        {
+                        'background-color': item.status_name === 'Submitted' ? '#5bc0de' :
+                        item.status_name === 'Disetujui' ? '#5cb85c' : 'red',
+                        'padding': '0.25rem',
+                        'color': 'white',
+                        'border-radius': '10px',
+                        'align-self': 'flex-start',
+                        'font-size': '1rem',
+                        'margin-bottom': '0.25rem'
+                        }
+                    ">{{item.status_name}}</span>
+                    </div>
+                </div>
+                <div style="width: 5%;">
+                    <ion-icon *ngIf="!item.readonly" name="close" style="color:maroon; zoom: 1.1"
+                        (click)="deleteTask(idx, item.id)"></ion-icon>
+                </div>
+            </ion-item>
+        </div>
+    </div>
+</ion-content>

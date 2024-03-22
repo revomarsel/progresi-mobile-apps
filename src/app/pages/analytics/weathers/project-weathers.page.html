@@ -1,0 +1,96 @@
+<HeaderGlobal [props]="props" (event)="eventHandler($event)"></HeaderGlobal>
+<!-- <ion-toolbar *ngIf="props.search.enable" color="dark">
+    <ion-searchbar slot="start" [(ngModel)]="searchKey" (ionChange)="searchValue()" (ionClear)="cancelSearch()" showCacnelButton="focus" animated></ion-searchbar>
+</ion-toolbar> -->
+<!-- <Filter *ngIf="props.filter.enable" [props]="props.filter" (event)="eventHandler($event)"></Filter> -->
+
+<ion-content>
+  <!-- <ion-refresher [disabled]="props.virtualScrollOptions.disablePullToRefresh" slot="fixed" (ionRefresh)="ionRefresh($event)"
+      (ionPull)="app.ionPull($event)" (ionStart)="app.ionStart($event)">
+      <ion-refresher-content pullingIcon="arrow-dropdown" pullingText="Pull to refresh" refreshingSpinner="circles" refreshingText="Refreshing...">
+      </ion-refresher-content>
+  </ion-refresher> -->
+  <ion-refresher
+    disabled="false"
+    slot="fixed"
+    (ionRefresh)="ionRefresh($event)"
+    (ionPull)="app.ionPull($event)"
+    (ionStart)="app.ionStart($event)"
+  >
+    <ion-refresher-content
+      pullingIcon="arrow-dropdown"
+      pullingText="Pull to refresh"
+      refreshingSpinner="circles"
+      refreshingText="Refreshing..."
+    >
+    </ion-refresher-content>
+  </ion-refresher>
+  <div id="myCalendar" class="vanilla-calendar"></div>
+  <ion-row class="legend">
+    <ion-col size="2" class="d-flex mr-2">
+      <div class="legend-color-today"></div>
+      <span class="legend-text"> Today</span>
+    </ion-col>
+    <ion-col size="2" class="d-flex mr-2">
+      <div class="legend-color-libur"></div>
+      <span class="legend-text"> Libur</span>
+    </ion-col>
+    <ion-col size="2" class="d-flex mr-2">
+      <div class="legend-color-cerah"></div>
+      <span class="legend-text"> Cerah</span>
+    </ion-col>
+    <ion-col size="2" class="d-flex mr-3">
+      <div class="legend-color-gerimis"></div>
+      <span class="legend-text"> Gerimis</span>
+    </ion-col>
+    <ion-col size="2" class="d-flex mr-2">
+      <div class="legend-color-hujan"></div>
+      <span class="legend-text"> Hujan</span>
+    </ion-col>
+  </ion-row>
+  <div *ngIf="weatherDetail">
+    <ion-card class="bg-white" style="border-radius: 20px">
+      <ion-grid>
+        <ion-row>
+          <ion-col
+            size="12"
+            style="text-align: center; margin: 10px 0"
+            class="text-primary text1"
+          >
+            <b>{{weather.tgl_lang}}</b>
+          </ion-col>
+        </ion-row>
+        <ion-row class="global-text-regular ls-weather">
+          <ion-col
+            size="3"
+            style="text-align: center"
+            *ngFor="let item of weather.wth;"
+          >
+            <ion-icon [name]="findIcon(item.nm_cuaca)" size="large"></ion-icon
+            ><br /><span class="jam">{{item.nm_cuaca}}</span><br />{{item.jml}}
+            <span class="jam">Jam</span>
+          </ion-col>
+        </ion-row>
+        <div style="padding: 0.25rem 3rem 0.25rem 3rem">
+          <div class="flex flex-row justify-between w-full text-primary">
+            <div class="text-center w-half"><b>Jam</b></div>
+            <div class="text-center w-half"><b>Cuaca</b></div>
+          </div>
+          <ion-list
+            *ngFor="let item of weatherDetailData"
+            class="item-list-padding"
+          >
+            <div class="flex flex-row justify-between w-full">
+              <div class="self-center text1 w-half text-center">
+                {{item.start_time+' - '+item.end_time}}
+              </div>
+              <div class="w-half self-center text-center">
+                <ion-icon [name]="item.weather" size="large"></ion-icon>
+              </div>
+            </div>
+          </ion-list>
+        </div>
+      </ion-grid>
+    </ion-card>
+  </div>
+</ion-content>

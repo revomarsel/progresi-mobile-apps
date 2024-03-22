@@ -1,0 +1,542 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-button size="small" shape="round" (click)="closeModal()" color="tertiary">
+        <ion-icon slot="start" icon="close"></ion-icon> {{ title ? title : 'Close' }}
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+  <ion-toolbar *ngIf="template == 'project_summary'">
+    <ion-row class="custom-row">
+      <ion-col size=6 style="text-align:center" class="small-header dead-center"><b>Schedule</b></ion-col>
+      <ion-col size=6 style="text-align:center" class="small-header dead-center"><b>Budget</b></ion-col>
+    </ion-row>
+  </ion-toolbar>
+  <ion-toolbar *ngIf="template == 'weather_details'">
+    <ion-row class="custom-row">
+      <ion-col size=6 style="text-align:center" class="small-header dead-center"><b>Jam</b></ion-col>
+      <ion-col size=6 style="text-align:center" class="small-header dead-center"><b>Cuaca</b></ion-col>
+    </ion-row>
+  </ion-toolbar>
+  <ion-toolbar *ngIf="template == 'task_summary'">
+    <ion-row class="custom-row">
+      <ion-col size=4 style="text-align:center" class="small-header dead-center"><b>Volume</b></ion-col>
+      <ion-col size=4 style="text-align:center" class="small-header dead-center"><b>Completion</b></ion-col>
+      <ion-col size=4 style="text-align:center" class="small-header dead-center">
+        <ion-row>
+          <ion-col size=12 class="small-header dead-center"><strong>Bobot</strong></ion-col>
+          <ion-col size=12 class="small-header dead-center"><strong>Total:
+              {{alpro.sum(value, 'actual_weight').toFixed(2)}}</strong></ion-col>
+        </ion-row>
+      </ion-col>
+    </ion-row>
+  </ion-toolbar>
+  <div *ngIf="template == 'arrival_materials' || template == 'consumed_materials'">
+    <ion-toolbar color="dark">
+      <ion-searchbar [(ngModel)]="searchKey" (ionChange)="searchValue('material')" (ionClear)="cancelSearch()">
+      </ion-searchbar>
+    </ion-toolbar>
+    <ion-toolbar>
+      <ion-grid>
+        <ion-row class="custom-row">
+          <ion-col size=4 align-self-center style="text-align:center" *ngIf="template == 'arrival_materials'"
+            class="small-header dead-center"><b>Jml. Diterima</b></ion-col>
+          <ion-col size=4 align-self-center style="text-align:center" *ngIf="template == 'consumed_materials'"
+            class="small-header dead-center"><b>Jml. Digunakan</b></ion-col>
+          <ion-col size=4 align-self-center style="text-align:center" *ngIf="template == 'arrival_materials'"
+            class="small-header dead-center"><b>Jml. Direncanakan</b></ion-col>
+          <ion-col size=4 align-self-center style="text-align:center" *ngIf="template == 'consumed_materials'"
+            class="small-header dead-center"><b>Jml. Maximum</b></ion-col>
+          <ion-col size=4 align-self-center style="text-align:center" *ngIf="template == 'arrival_materials'"
+            class="small-header dead-center"><b>Penerimaan</b></ion-col>
+          <ion-col size=4 align-self-center style="text-align:center" *ngIf="template == 'consumed_materials'"
+            class="small-header dead-center"><b>Sisa Material</b></ion-col>
+        </ion-row>
+      </ion-grid>
+    </ion-toolbar>
+  </div>
+  <div *ngIf="template == 'in_equipments' || template == 'out_equipments'">
+    <ion-toolbar color="dark">
+      <ion-searchbar [(ngModel)]="searchKey" (ionChange)="searchValue('equipment')" (ionClear)="cancelSearch()">
+      </ion-searchbar>
+    </ion-toolbar>
+    <ion-toolbar>
+      <ion-grid>
+        <ion-row class="custom-row">
+          <ion-col size=4 align-self-center style="text-align:center" *ngIf="template == 'in_equipments'"
+            class="small-header dead-center"><b>Jml. Mob.</b></ion-col>
+          <ion-col size=4 align-self-center style="text-align:center" *ngIf="template == 'out_equipments'"
+            class="small-header dead-center"><b>Jml. Demob.</b></ion-col>
+          <ion-col size=4 align-self-center style="text-align:center" class="small-header dead-center"><b>Jml.
+              Direncanakan</b></ion-col>
+          <ion-col size=4 align-self-center style="text-align:center" *ngIf="template == 'in_equipments'"
+            class="small-header dead-center"><b>Belum Mob.</b></ion-col>
+          <ion-col size=4 align-self-center style="text-align:center" *ngIf="template == 'out_equipments'"
+            class="small-header dead-center"><b>Belum Demob.</b></ion-col>
+        </ion-row>
+      </ion-grid>
+    </ion-toolbar>
+  </div>
+</ion-header>
+
+<ion-content padding>
+  <!-- TASK DETAILS -->
+  <div *ngIf="template === 'predecessor'">
+    <ion-grid>
+      <ion-virtual-scroll [items]="value" approxItemHeight="320px">
+        <ion-item *virtualItem="let item; let itemBounds = bounds;" ion-padding>
+          <b>{{item.name}}</b>
+        </ion-item>
+      </ion-virtual-scroll>
+    </ion-grid>
+  </div>
+  <div *ngIf="template === 'material'">
+    <ion-toolbar class="flex flex-col w-full" *ngIf="value.task_detail" style="padding:1rem 1rem 0.5rem 1rem">
+      <div class="flex flex-row w-full justify-between">
+        <div class="flex flex-col" style="width:80%">
+          <div class="global-text-desc">
+            {{value.task_detail.project_name}} - {{value.task_detail.baseline_name}}
+          </div>
+          <div class="global-text-regular">
+            <b>{{value.task_detail.name}}</b>
+          </div>
+        </div>
+        <div class="flex flex-col text-center self-center" style="padding-left: 0.25rem;">
+          <div class="global-text-regular">
+            <b style="color:var(--ion-color-primary)">{{value.task_detail.qty}}</b>&nbsp;
+            <span class="global-text-desc">{{value.task_detail.unit}}</span>
+          </div>
+          <div class="global-text-little-detail">
+            Vol./Qty
+          </div>
+        </div>
+      </div>
+      <div class="global-text-desc" style="margin:1rem 0rem 0.25rem 0">
+        <ion-icon name="calendar"></ion-icon>&nbsp;{{value.task_detail.start_date | date:'dd MMM yyyy'}} -
+        {{value.task_detail.end_date |
+        date:'dd MMM yyyy'}}
+      </div>
+    </ion-toolbar>
+    <ion-grid *ngIf="value.list">
+      <ion-virtual-scroll [items]="value.list" approxItemHeight="320px">
+        <ion-item *virtualItem="let item; let itemBounds = bounds;" style="padding:0.25rem">
+          <div class="flex flex-col w-full">
+            <div class="flex flex-row w-full justify-between" style="margin-bottom: 0.5rem;">
+              <div class="flex flex-col global-text-regular">
+                <b>{{item.name}}</b>
+              </div>
+              <div class="global-text-regular items-end">
+                <b style="color:var(--ion-color-primary)">{{item.qty}}</b>
+                &nbsp;<span style="font-size: 0.75rem;">{{item.unit ? item.unit : '-'}}</span>
+              </div>
+            </div>
+            <div class="flex flex-row justify-between" style="padding:0.25rem">
+              <div class="global-text-desc dim-text items-start">Harga Satuan</div>
+              <div class="global-text-desc items-end"><b>{{item.price | currency:"Rp. ":true:"1.0"}}</b>
+              </div>
+            </div>
+            <div class="flex flex-row justify-between" style="padding:0.25rem">
+              <div class="global-text-desc dim-text items-start">Tgl. Terima</div>
+              <div class="global-text-desc items-end"><b>{{item.arrival_date | date:'dd MMM yyyy'}}</b>
+              </div>
+            </div>
+            <div class="flex flex-row justify-between" style="padding:0.25rem">
+              <div class="global-text-desc dim-text items-start self-center">Supplier</div>
+              <div class="global-text-desc items-end flex flex-col">
+                <b>{{item.supplier ? item.supplier : '-'}}</b>
+                <span class="global-text-little-detail">{{item.contact ? item.contact : '-'}}</span>
+              </div>
+            </div>
+          </div>
+        </ion-item>
+      </ion-virtual-scroll>
+    </ion-grid>
+  </div>
+  <div *ngIf="template === 'equipment'">
+    <ion-toolbar class="flex flex-col w-full" *ngIf="value.task_detail" style="padding:1rem 1rem 0.5rem 1rem">
+      <div class="flex flex-row w-full justify-between">
+        <div class="flex flex-col" style="width:80%">
+          <div class="global-text-desc">
+            {{value.task_detail.project_name}} - {{value.task_detail.baseline_name}}
+          </div>
+          <div class="global-text-regular">
+            <b>{{value.task_detail.name}}</b>
+          </div>
+        </div>
+        <div class="flex flex-col text-center self-center" style="padding-left: 0.25rem;">
+          <div class="global-text-regular">
+            <b style="color:var(--ion-color-primary)">{{value.task_detail.qty}}</b>&nbsp;
+            <span class="global-text-desc">{{value.task_detail.unit}}</span>
+          </div>
+          <div class="global-text-little-detail">
+            Vol./Qty
+          </div>
+        </div>
+      </div>
+      <div class="global-text-desc" style="margin:1rem 0rem 0.25rem 0">
+        <ion-icon name="calendar"></ion-icon>&nbsp;{{value.task_detail.start_date | date:'dd MMM yyyy'}} -
+        {{value.task_detail.end_date |
+        date:'dd MMM yyyy'}}
+      </div>
+    </ion-toolbar>
+    <ion-grid *ngIf="value.list">
+      <ion-virtual-scroll [items]="value.list" approxItemHeight="320px">
+        <ion-item *virtualItem="let item; let itemBounds = bounds;" style="padding:0.25rem">
+          <div class="flex flex-col w-full">
+            <div class="flex flex-row w-full justify-between" style="margin-bottom: 0.5rem;">
+              <div class="flex flex-col global-text-regular">
+                <b>{{item.name}}</b>
+              </div>
+              <div class="global-text-regular items-end">
+                <b style="color:var(--ion-color-primary)">{{item.qty}}</b>
+                &nbsp;<span style="font-size: 0.75rem;">{{item.unit ? item.unit : '-'}}</span>
+              </div>
+            </div>
+            <div class="flex flex-row justify-between" style="padding:0.25rem">
+              <div class="global-text-desc dim-text items-start">Harga</div>
+              <div class="global-text-desc items-end"><b>{{item.price | currency:"Rp. ":true:"1.0"}}</b>
+              </div>
+            </div>
+            <div class="flex flex-row justify-between" style="padding:0.25rem">
+              <div class="global-text-desc dim-text items-start">Tgl. Mob</div>
+              <div class="global-text-desc items-end"><b>{{item.arrival_date | date:'dd MMM yyyy'}}</b>
+              </div>
+            </div>
+            <div class="flex flex-row justify-between" style="padding:0.25rem">
+              <div class="global-text-desc dim-text items-start">Tgl. Demob</div>
+              <div class="global-text-desc items-end"><b>{{item.out_date | date:'dd MMM yyyy'}}</b>
+              </div>
+            </div>
+            <div class="flex flex-row justify-between" style="padding:0.25rem" *ngIf="item.rent_duration > 0">
+              <div class="global-text-desc dim-text items-start">Lama Sewa</div>
+              <div class="global-text-desc items-end">
+                <b>{{item.rent_duration}}</b>&nbsp;
+                <span class="global-text-little-detail">hari</span>
+              </div>
+            </div>
+            <div class="flex flex-row justify-between" style="padding:0.25rem">
+              <div class="global-text-desc dim-text items-start self-center">Supplier</div>
+              <div class="global-text-desc items-end flex flex-col">
+                <b>{{item.supplier ? item.supplier : '-'}}</b>
+                <span class="global-text-little-detail">{{item.contact ? item.contact : '-'}}</span>
+              </div>
+            </div>
+          </div>
+        </ion-item>
+      </ion-virtual-scroll>
+    </ion-grid>
+  </div>
+  <div *ngIf="template === 'worker'">
+    <ion-toolbar class="flex flex-col w-full" *ngIf="value.task_detail" style="padding:1rem 1rem 0.5rem 1rem">
+      <div class="flex flex-row w-full justify-between">
+        <div class="flex flex-col" style="width:80%">
+          <div class="global-text-desc">
+            {{value.task_detail.project_name}} - {{value.task_detail.baseline_name}}
+          </div>
+          <div class="global-text-regular">
+            <b>{{value.task_detail.name}}</b>
+          </div>
+        </div>
+        <div class="flex flex-col text-center self-center" style="padding-left: 0.25rem;">
+          <div class="global-text-regular">
+            <b style="color:var(--ion-color-primary)">{{value.task_detail.qty}}</b>&nbsp;
+            <span class="global-text-desc">{{value.task_detail.unit}}</span>
+          </div>
+          <div class="global-text-little-detail">
+            Total Qty.
+          </div>
+        </div>
+      </div>
+      <div class="global-text-desc" style="margin:1rem 0rem 0.25rem 0">
+        <ion-icon name="calendar"></ion-icon>&nbsp;{{value.task_detail.start_date | date:'dd MMM yyyy'}} -
+        {{value.task_detail.end_date |
+        date:'dd MMM yyyy'}}
+      </div>
+    </ion-toolbar>
+    <ion-grid *ngIf="value.list">
+      <ion-item *ngFor="let item of value.list; let idx = index" style="padding:0.25rem">
+        <div class="flex flex-col w-full">
+          <div class="flex flex-row w-full justify-between" style="margin-bottom: 0.5rem;" (click)="item.expanded = !item.expanded">
+            <div class="flex flex-col global-text-regular">
+              <strong>Minggu ke-{{ value.list.length - idx }} : {{item.key | date:'dd MMM yyyy'}}</strong>
+            </div>
+            <ion-icon [name]="item.expanded ? 'chevron-up-outline' : 'chevron-down-outline'"></ion-icon>
+          </div>
+          <div>
+            <Accordion [expandHeight]="item.items.length * 100" [expanded]="item.expanded">
+              <div *ngFor="let content of item.items" style="padding:0.25rem">
+                <div class="flex flex-row w-full justify-between">
+                  <div class="global-text-desc self-center" style="width: 70%"><b>{{content.date | date:'dd MMM yyyy'}}</b></div>
+                  <div class="flex flex-col w-full">
+                    <div class="flex flex-row w-full justify-between">
+                      <div class="global-text-little-detail">Tukang</div>
+                      <div class="global-text-desc">{{content.tukang}}</div>
+                    </div>
+                    <div class="flex flex-row w-full justify-between">
+                      <div class="global-text-little-detail">Pembantu Tukang</div>
+                      <div class="global-text-desc">{{content.pembantu_tukang}}</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </Accordion>
+          </div>
+        </div>
+      </ion-item>
+    </ion-grid>
+  </div>
+  <!-- TASK DETAILS -->
+
+  <!-- TASK PROGRESS SUMMARY -->
+  <div *ngIf="template == 'task_summary'">
+    <ion-grid>
+      <ion-virtual-scroll [items]="value" approxItemHeight="320px">
+        <ion-row *virtualItem="let item; let itemBounds = bounds;" no-padding class="custom-row">
+          <ion-col size=12 class="subtitle" style="margin: 5px !important">
+            <ion-row align-self-center style="text-align:left"><b>{{item.parent_name}}</b></ion-row>
+            <ion-row align-self-center style="text-align:left">{{item.name}}</ion-row>
+          </ion-col>
+          <ion-col size=4 align-self-center style="text-align:center" class="white">
+            <span>{{item.completion ? item.completion : '-'}} /
+              {{item.target_completion ? item.target_completion : '-'}}</span>
+          </ion-col>
+          <ion-col size=4 align-self-center style="text-align:center" class="white">
+            <span><b>{{(item.percentage_completion/1).toFixed(2)}}%</b></span>
+          </ion-col>
+          <ion-col size=4 align-self-center style="text-align:center" class="white">
+            <span>{{(item.actual_weight/1).toFixed(2)}} / {{(item.total_weight/1).toFixed(2)}}</span>
+          </ion-col>
+        </ion-row>
+      </ion-virtual-scroll>
+    </ion-grid>
+  </div>
+  <!-- PROJECTS GRAPH SUMMARY -->
+  <div *ngIf="template == 'project_summary'">
+    <ion-grid>
+      <ion-virtual-scroll [items]="value" approxItemHeight="320px">
+        <ion-row *virtualItem="let item; let itemBounds = bounds;" no-padding class="custom-row">
+          <ion-col size=12 align-self-center style="text-align:left" class="subtitle">
+            {{item.label | date:'dd MMM yyyy'}}</ion-col>
+          <ion-col size=6 align-self-center style="text-align:center" class="white">
+            <span *ngIf="!item.pelaksanaan">-</span>
+            <span *ngIf="item.pelaksanaan - item.rencana < 0 && item.pelaksanaan" style="color:red">Behind</span>
+            <span *ngIf="item.pelaksanaan - item.rencana >= 0 && item.pelaksanaan" style="color:green">Ahead</span>
+          </ion-col>
+          <ion-col size=6 align-self-center style="text-align:center" class="white">
+            <span *ngIf="!item.pelaksanaan || !item.percentagecost">-</span>
+            <span *ngIf="item.pelaksanaan && item.percentagecost && item.pelaksanaan - item.percentagecost < 0"
+              style="color:red">Over</span>
+            <span *ngIf="item.pelaksanaan && item.percentagecost && item.pelaksanaan - item.percentagecost >= 0"
+              style="color:green">Under</span>
+          </ion-col>
+          <!-- <ion-col size=4 align-self-center style="text-align:center" class="white">{{((item.pelaksanaan - item.percentagecost) * model.total_nominal) / 100| currency : 'Rp. ' : 2}}</ion-col> -->
+        </ion-row>
+      </ion-virtual-scroll>
+    </ion-grid>
+  </div>
+  <!-- WEATHER DETAIL -->
+  <div *ngIf="template == 'weather_details'">
+    <ion-grid>
+      <ion-virtual-scroll [items]="value" approxItemHeight="320px">
+        <ion-row *virtualItem="let item; let itemBounds = bounds;" no-padding class="custom-row ls-cuaca">
+          <ion-col size=6 style="text-align:center">
+            {{item.start_time+' - '+item.end_time}}
+          </ion-col>
+          <ion-col size=6 style="text-align:center">
+            <ion-icon [name]="item.weather" size="large"></ion-icon>
+          </ion-col>
+        </ion-row>
+      </ion-virtual-scroll>
+    </ion-grid>
+  </div>
+  <!-- Analytics Overall Summary -->
+  <div *ngIf="template == 'arrival_materials' || template == 'consumed_materials'">
+    <ion-grid>
+      <ion-virtual-scroll [items]="value" approxItemHeight="320px">
+        <ion-grid *virtualItem="let item; let itemBounds = bounds;" no-padding class="custom-row">
+          <ion-row *ngIf="template == 'consumed_materials'" style="text-align:left" class="subtitle" padding>
+            <b>{{item.material}}</b>&nbsp;({{item.unit}}) - {{ ((item.qty/item.max_use)*100).toFixed(2) }}%
+            {{ item.qty/item.max_use > 1 ? '(Over)' : item.qty/item.max_use < 1 ? '(Under)' : '' }} </ion-row>
+              <ion-row *ngIf="template == 'consumed_materials'" padding>
+                <ion-col size=4 style="text-align:center">{{ item.qty ? item.qty : '-' }}</ion-col>
+                <ion-col size=4 style="text-align:center">{{ item.max_use ? item.max_use : '-' }}</ion-col>
+                <ion-col size=4 style="text-align:center" align-self-center>
+                  <b [ngStyle]="(item.max_use-item.qty) < 0 ? {'color':'red'} : {'color':'green'}">
+                    {{item.qty ? (item.max_use-item.qty).toFixed(2) : ''}}
+                  </b>
+                </ion-col>
+              </ion-row>
+              <ion-row *ngIf="template == 'arrival_materials'" style="text-align:left" class="subtitle" padding>
+                <b>{{item.material}}</b>&nbsp;({{item.unit}}) - {{ ((item.arrived_qty/item.planned_qty)*100).toFixed(2)
+                }}%
+                {{ item.arrived_qty/item.planned_qty > 1 ? '(Over)' : item.arrived_qty/item.planned_qty < 1 ? '(Under)'
+                  : '' }} </ion-row>
+                  <ion-row *ngIf="template == 'arrival_materials'" padding>
+                    <ion-col size=4 style="text-align:center">{{ item.arrived_qty ? item.arrived_qty : '-' }}</ion-col>
+                    <ion-col size=4 style="text-align:center">{{ item.planned_qty ? item.planned_qty : '-' }}</ion-col>
+                    <ion-col size=4 style="text-align:center" align-self-center>
+                      <b
+                        [ngStyle]="(item.arrived_qty - item.planned_qty) < 0 ? {'color':'#f4a942'} : item.arrived_qty - item.planned_qty > 0 ? {'color':'red'} : {'color':'green'}">
+                        {{ (item.arrived_qty - item.planned_qty).toFixed(2) }}
+                      </b>
+                    </ion-col>
+                  </ion-row>
+        </ion-grid>
+      </ion-virtual-scroll>
+    </ion-grid>
+  </div>
+  <div *ngIf="template == 'in_equipments' || template == 'out_equipments'">
+    <ion-grid>
+      <ion-virtual-scroll [items]="value" approxItemHeight="320px">
+        <ion-grid *virtualItem="let item; let itemBounds = bounds;" no-padding class="custom-row">
+          <ion-row style="text-align:left" class="subtitle" padding>
+            <b>{{item.equipment}}</b>&nbsp;({{item.unit}}) - {{ ((item.arrived_qty/item.planned_qty)*100).toFixed(2) }}%
+          </ion-row>
+          <ion-row padding>
+            <ion-col size=4 style="text-align:center">{{ item.arrived_qty ? item.arrived_qty : '-' }}</ion-col>
+            <ion-col size=4 style="text-align:center">{{ item.planned_qty ? item.planned_qty : '-' }}</ion-col>
+            <ion-col size=4 style="text-align:center" align-self-center>
+              <b [ngStyle]="(item.arrived_qty-item.planned_qty) < 0 ? {'color':'red'} : {'color':'green'}">
+                {{ (item.arrived_qty - item.planned_qty).toFixed(2) }}
+              </b>
+            </ion-col>
+          </ion-row>
+        </ion-grid>
+      </ion-virtual-scroll>
+    </ion-grid>
+  </div>
+  <div *ngIf="template === 'attachments'" class="ion-padding">
+    <ion-item *ngFor="let item of value">
+      <ion-grid>
+        <ion-row>
+          <ion-slides [options]="sliderOpts" zoom>
+            <ion-slide>
+              <div class="swiper-zoom-container" style="min-height: 225px;">
+                <img [src]="value.url+item.url">
+              </div>
+            </ion-slide>
+          </ion-slides>
+        </ion-row>
+        <ion-row>
+          <ion-label class="ion-text-wrap">{{item.info}}</ion-label>
+        </ion-row>
+      </ion-grid>
+    </ion-item>
+  </div>
+  <div *ngIf="template == 'notification'" class="modal-content-container">
+    <ion-virtual-scroll [items]="value" approxItemHeight="320px">
+      <ion-item *virtualItem="let item; let itemBounds = bounds; let i = index;" class="no-padding">
+        <ion-grid class="padding">
+          <ion-row class="row-spacer">
+            <ion-label text-wrap>
+              <ion-icon *ngIf="item.type==='Equipment'" name="construct"></ion-icon>
+              <ion-icon *ngIf="item.type==='Material'" name="cube"></ion-icon>
+              <ion-icon *ngIf="item.type==='Task'" name="list"></ion-icon>
+              <ion-icon *ngIf="item.type==='Worker'" name="person"></ion-icon>
+              <ion-icon *ngIf="item.type==='Kendala'" name="warning"></ion-icon>
+              <ion-icon *ngIf="item.type==='Comments'" name="chatbubbles"></ion-icon>
+              <b class="global-text-regular">&nbsp;{{ item.item }}</b>
+            </ion-label>
+          </ion-row>
+          <ion-row>
+            <ion-text text-wrap class="global-text-little-detail">{{ item.info }}</ion-text>
+          </ion-row>
+        </ion-grid>
+      </ion-item>
+    </ion-virtual-scroll>
+  </div>
+  <div *ngIf="template == 'subcon_task_history'" class="modal-content-container">
+    <ion-virtual-scroll [items]="value" approxItemHeight="320px">
+      <ion-item *virtualItem="let item; let itemBounds = bounds; let i = index;">
+        <div class="flex flex-col" style='width: 100%; margin:0.5rem 0 0.5rem 0'>
+          <div class="flex flex-row global-text-regular" style='justify-content: space-between;'>
+            <strong>{{item.date | date:'dd MMM yyyy'}}</strong>
+            <span>
+              <strong>{{item.submitted_capaian | number:'0.0-2'}} / {{item.weight_today |
+                number:'0.0-2'}}</strong>&nbsp;%
+            </span>
+          </div>
+          <div class="flex flex-row" style="margin: 0.25rem 0 0.25rem 0; justify-content: space-between;">
+            <span [ngStyle]="{ 
+              'color': item.status_v === 'Submitted' ? '#5bc0de' : '', 
+              'zoom' : item.status_v === 'Submitted' && 1.15
+            }">Submitted</span>
+            <div class="flex flex-col" style="align-items: flex-end;">
+              <strong>{{item.submitted_by}}</strong>
+              <span class='global-text-little-detail'>{{item.submitted_time | date:'dd MMM yyyy HH:mm:ss'}}</span>
+            </div>
+          </div>
+          <div *ngIf="item.status_v === 'Direvisi'" class="flex flex-row"
+            style="margin: 0.25rem 0 0.25rem 0; justify-content: space-between;">
+            <span [ngStyle]="{ 
+              'color': item.status_v === 'Direvisi' ? 'red' : '', 
+              'zoom' : item.status_v === 'Direvisi' && 1.15
+            }">Direvisi</span>
+            <div class="flex flex-col" style="align-items: flex-end;">
+              <strong>{{item.revised_by}}</strong>
+              <span class='global-text-little-detail'>{{item.revised_time | date:'dd MMM yyyy HH:mm:ss'}}</span>
+            </div>
+          </div>
+          <div *ngIf="item.status_v === 'Disetujui'" class="flex flex-row"
+            style="margin: 0.25rem 0 0.25rem 0; justify-content: space-between;">
+            <span [ngStyle]="{ 
+              'color': item.status_v === 'Disetujui' ? '#5cb85c' : '', 
+              'zoom' : item.status_v === 'Disetujui' && 1.15
+            }">Disetujui</span>
+            <div class="flex flex-col" style="align-items: flex-end;">
+              <strong>{{item.approver_user}}</strong>
+              <span class='global-text-little-detail'>{{item.approved_time | date:'dd MMM yyyy HH:mm:ss'}}</span>
+            </div>
+          </div>
+        </div>
+        <!-- {{item.date}}
+        {{item.submitted_capaian}}
+        {{item.weight_today}}
+        {{item.approved_capaian}}
+        {{item.status_v}}
+        {{item.submitted_by}}
+        {{item.submitted_time}}
+        {{item.revised_by}
+        {{item.revised_time}
+        {{item.approver_user}}
+        {{item.approved_time}} -->
+
+        <!-- approved_capaian: null
+approved_time: null
+approver_user: null
+date: "2021-01-01"
+id: 99
+info: "aaaaa"
+qty: 2
+revised_by: null
+revised_time: null
+status: "2"
+status_v: "revisi"
+submitted_by: "Subconcon 2"
+submitted_capaian: "1.00"
+submitted_time: "2020-12-30 16:24:42"
+unit: "ls"
+weight: "64.86"
+weight_today: "32.43" -->
+      </ion-item>
+    </ion-virtual-scroll>
+  </div>
+  <div *ngIf="template === 'capaian_log'" class="p-2">
+    <ion-item *ngFor="let item of value; let idx = index">
+      <div class="flex flex-row w-full justify-between">
+        <div class="global-text-regular flex flex-col w-third">
+          <span style="border-bottom:1px solid #ececec" class="font-bold py-2">{{item.name}}</span>
+          <span class="py-2 global-text-little-detail text-dark">{{item.created_date | date:'dd MMM yyyy'}}</span>
+        </div>
+        <div class="global-text-regular w-third flex flex-col self-center">
+          <span class="text-center">{{item.side === 'K' ? 'Kontraktor' : 'Owner'}}</span>
+          <span class="global-text-little-detail text-center">Sisi</span>
+        </div>
+        <div class="global-text-regular w-third flex flex-col self-center">
+          <span class="text-center" [ngClass]="item.type === 'C' ? 'text-green' : 'text-danger'">{{item.type === 'C' ? 'Check' : 'Uncheck'}}</span>
+          <span class="global-text-little-detail text-center">Action</span>
+        </div>
+      </div>
+    </ion-item>
+  </div>
+</ion-content>

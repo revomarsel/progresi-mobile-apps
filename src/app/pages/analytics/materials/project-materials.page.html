@@ -1,0 +1,217 @@
+<HeaderGlobal [props]="props" (event)="eventHandler($event)"></HeaderGlobal>
+<Tabs
+  *ngIf="props.tabs.enable"
+  [props]="props.tabs"
+  (event)="eventHandler($event)"
+></Tabs>
+
+<ion-content>
+  <!-- <ion-refresher [disabled]="props.virtualScrollOptions.disablePullToRefresh" slot="fixed"
+    (ionRefresh)="ionRefresh($event)" (ionPull)="app.ionPull($event)" (ionStart)="app.ionStart($event)"> -->
+  <ion-refresher
+    disabled="false"
+    slot="fixed"
+    (ionRefresh)="ionRefresh($event)"
+    (ionPull)="app.ionPull($event)"
+    (ionStart)="app.ionStart($event)"
+  >
+    <ion-refresher-content
+      pullingIcon="arrow-dropdown"
+      pullingText="Pull to refresh"
+      refreshingSpinner="circles"
+      refreshingText="Refreshing..."
+    >
+    </ion-refresher-content>
+  </ion-refresher>
+  <div class="center-item">
+    <ion-spinner
+      [hidden]="isDataEmpty || (data_paging[props.tabs.current] && data_paging[props.tabs.current].length > 0)"
+      name="dots"
+    ></ion-spinner>
+    <div
+      *ngIf="isDataEmpty && (data_paging[props.tabs.current] && data_paging[props.tabs.current].length < 1)"
+    >
+      -- NO DATA --
+    </div>
+  </div>
+  <!-- <virtual-scroller #scroll [items]="data_paging[props.tabs.current]" (vsUpdate)="props.virtualScrollOptions.setState($event)">
+    <ion-item *ngFor="let item of scroll.viewPortItems" class="global-text-regular" (click)="expandData(item.key)"> -->
+  <ion-card
+    *ngFor="let item of data_paging[props.tabs.current]"
+    class="global-text-regular"
+    (click)="expandData(item.key)"
+  >
+    <ion-grid>
+      <ion-row
+        class="global-text-regular"
+        style="color: var(--ion-color-primary)"
+      >
+        <ion-col size="10"><strong>{{item.key}}</strong></ion-col>
+        <ion-col size="2" style="text-align: right">
+          <ion-icon
+            [name]="item.expanded ? 'chevron-up-outline' : 'chevron-down-outline'"
+          ></ion-icon>
+        </ion-col>
+      </ion-row>
+      <Accordion
+        [expandHeight]="item.items.length * 100"
+        [expanded]="item.expanded"
+        *ngIf="props.tabs.current === 'arrival'"
+      >
+        <ion-item *ngFor="let content of item.items">
+          <div class="flex flex-col w-full item-list-padding">
+            <div class="flex flex-row w-full">
+              <div style="width: 10%" class="self-center">
+                <ion-icon
+                  name="list"
+                  size="small"
+                  style="color: var(--ion-color-primary)"
+                ></ion-icon>
+              </div>
+              <div class="flex flex-col font-bold">
+                {{content.parent_task ? content.parent_task :
+                  content.name}}
+                <span
+                  class="global-text-little-detail text085"
+                  *ngIf="!content_parent_task"
+                  style="padding: 0.2rem 0 0 0"
+                >
+                  {{content.name}}
+                </span>
+              </div>
+            </div>
+            <div
+              class="flex flex-row w-full justify-between"
+              style="padding: 0.75rem 0 0.75rem 0"
+            >
+              <div style="width: 10%"></div>
+              <div class="flex flex-row justify-between w-full">
+                <div class="flex flex-col w-half text-left">
+                  <div style="padding: 0 0 0.5rem 0">
+                    <div
+                      class="global-text-regular text-primary font-bold"
+                      style="margin-top: 0.2rem"
+                    >
+                      {{(content.arrived_qty > 0 ? content.date : content.planned_arrival) | date:'dd MMM yyyy'}}
+                    </div>
+                    <div class="global-text-little-detail">{{content.arrived_qty > 0 ? 'Tgl. Diterima' : 'Tgl. Rencana'}}</div>
+                  </div>
+                  <div
+                    [ngStyle]="content.datediff >= 0 && content.arrived_qty > 0 ? {'color':'green'} : {'color':'red'}"
+                    class="text085 font-bold"
+                  >
+                    {{content.arrived_qty > 0 ? (content.datediff === 0 ? 'On-Time' : content.datediff !== 0 && content.datediff+' hari') : 'Belum Diterima'}}
+                  </div>
+                </div>
+                <div
+                  class="w-half flex justify-end"
+                  style="
+                    background: var(--ion-color-primary);
+                    padding: 0 0.5rem 0 0;
+                    border-radius: 10px;
+                  "
+                >
+                  <div class="flex flex-col text-right self-center">
+                    <div class="text-white">
+                      <b
+                        >{{content.arrived_qty > 0 ? content.arrived_qty : ' -
+                        '}}</b
+                      >
+                      / {{content.planned_qty}} {{content.unit}}
+                    </div>
+                    <div class="global-text-little-detail text-tertiary">
+                      Jumlah diterima
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </ion-item>
+      </Accordion>
+      <Accordion
+        [expandHeight]="item.items.length * 100"
+        [expanded]="item.expanded"
+        *ngIf="props.tabs.current === 'consumed'"
+      >
+        <ion-item *ngFor="let content of item.items">
+          <div class="flex flex-col w-full item-list-padding">
+            <div class="flex flex-row w-full">
+              <div style="width: 10%" class="self-center">
+                <ion-icon
+                  name="list"
+                  size="small"
+                  style="color: var(--ion-color-primary)"
+                ></ion-icon>
+              </div>
+              <div class="flex flex-col">
+                <b
+                  >{{content.parent_task ? content.parent_task :
+                  content.name}}</b
+                >
+                <span
+                  class="global-text-little-detail text085"
+                  *ngIf="!content_parent_task"
+                  style="padding: 0.2rem 0 0 0"
+                >
+                  {{content.name}}
+                </span>
+              </div>
+            </div>
+            <div class="flex flex-row w-full" style="margin: 0.5rem 0 0.5rem 0">
+              <div style="width: 10%"></div>
+              <div
+                class="flex flex-row justify-between bg-light global-radius"
+                style="padding: 0.75rem 0.5rem 0.75rem 0.5rem; width: 90%"
+              >
+                <div class="flex flex-row justify-between w-full text-center">
+                  <div class="flex flex-col text1">
+                    <b
+                      >{{content.qty ? content.qty : ' - '}} {{content.unit}}</b
+                    >
+                    <span class="global-text-little-detail">Pemakaian</span>
+                  </div>
+                  <div class="flex flex-col text1">
+                    <b
+                      >{{content.max_use ? content.max_use : ' - '}}
+                      {{content.unit}}</b
+                    >
+                    <span class="global-text-little-detail">Max.</span>
+                  </div>
+                  <div class="flex flex-col text1">
+                    <b
+                      [ngStyle]="(content.max_use-content.qty) < 0 ? {'color':'red'} : {'color':'green'}"
+                    >
+                      {{content.qty ? (content.max_use-content.qty).toFixed(2) :
+                      ''}} {{content.unit}}
+                    </b>
+                    <span class="global-text-little-detail">Sisa</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div
+              class="flex flex-col w-full"
+              style="padding: 0.25rem 0 0.25rem 0"
+            >
+              <div class="flex justify-end global-text-regular text-primary">
+                <b>{{content.report_date | date:'dd MMM yyyy'}}</b>
+              </div>
+              <div class="global-text-little-detail flex justify-end">
+                Tgl. Digunakan
+              </div>
+            </div>
+          </div>
+        </ion-item>
+      </Accordion>
+    </ion-grid>
+  </ion-card>
+  <!-- </virtual-scroller> -->
+  <ion-infinite-scroll threshold="100px" (ionInfinite)="loadData($event)">
+    <ion-infinite-scroll-content
+      loadingSpinner="bubbles"
+      loadingText="Loading more data..."
+    >
+    </ion-infinite-scroll-content>
+  </ion-infinite-scroll>
+</ion-content>

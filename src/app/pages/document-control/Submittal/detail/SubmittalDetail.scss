@@ -1,0 +1,149 @@
+ion-card {
+  border-radius: 0px;
+  border: 0px;
+  margin-bottom: 10px;
+}
+.btn {
+  padding: 5px;
+  margin: 3px 0px;
+}
+.btn-primary {
+  background-color: #6ba3ff;
+  border-color: #6ba3ff;
+  color: white;
+}
+.btn-warning {
+  background-color: #ff954e;
+  color: white;
+  border-color: #ff954e;
+}
+td,
+th {
+  padding: 2px 8px;
+}
+
+.bgCard {
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-attachment: unset;
+  background-position: center;
+  height: 100px;
+  background-color: #4285f4 !important;
+}
+
+.titleCard {
+  display: inline-block;
+  color: white;
+  padding-left: 10px;
+  align-self: flex-end;
+  padding-bottom: 10px;
+  margin-top: auto;
+}
+.titleCardRight {
+  min-width: 195px;
+  display: inline-block;
+  color: white;
+  text-align: right;
+  align-self: flex-start;
+  padding-top: 5px;
+  padding-right: 10px;
+}
+.badge {
+  display: inline;
+  padding: 0.2em 0.6em 0.3em;
+  font-size: 75%;
+  font-weight: 700;
+  line-height: 1;
+  color: #fff;
+  text-align: center;
+  white-space: nowrap;
+  vertical-align: baseline;
+  border-radius: 0.25em;
+}
+.badge-success {
+  background-color: #5cb85c;
+}
+.badge-danger {
+  background-color: #c93535;
+}
+.mr-2 {
+  margin-right: 5px;
+}
+.w-100 {
+  width: 100%;
+}
+.baseTitleCard {
+  height: 80px;
+  display: flex;
+}
+
+.d-block {
+  display: block;
+}
+.mb-1 {
+  margin-bottom: 5px;
+}
+
+tr {
+  border-bottom: 1px dotted #e5e4e4;
+}
+
+td,
+th {
+  padding: 10px 5px !important;
+}
+
+.actionBox {
+  border-top: 1px dotted #bbb;
+  padding: 10px;
+}
+
+.commentList {
+  padding: 0;
+  list-style: none;
+  max-height: 200px;
+  overflow: auto;
+}
+
+ol,
+ul {
+  margin-top: 0;
+  margin-bottom: 10px;
+}
+
+.commentList li {
+  margin: 0;
+  margin-top: 10px;
+  border-bottom: 1px dotted #bbb;
+  padding-bottom: 10px;
+}
+
+.commentList li > div {
+  display: block;
+}
+
+.commenterImage {
+  width: 30px;
+  margin-right: 10px;
+  height: 100%;
+  float: left;
+  margin-top: 5px;
+}
+
+.commenterImage img {
+  width: 100%;
+  border-radius: 50%;
+}
+
+.commentList li > div {
+  display: block;
+}
+
+.textarea {
+  border: 1px solid #ebe7e7;
+  padding: 10px;
+}
+
+.mb-8 {
+  margin-bottom: 7.5rem;
+}

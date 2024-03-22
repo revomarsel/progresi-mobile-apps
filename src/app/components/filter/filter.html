@@ -1,0 +1,18 @@
+<ion-toolbar>
+  <ion-item>
+    <ion-label>{{props.title}}</ion-label>
+    <ionic-selectable
+      [(ngModel)]="props.data"
+      [items]="props.list"
+      [itemValueField]="props.value"
+      [itemTextField]="props.text"
+      [canSearch]="props.canSearch"
+      (onChange)="func(props.onChange)">
+    </ionic-selectable>
+    <ion-buttons slot="end" [hidden]="props.hideClear">
+      <ion-button size="small" shape="round" (click)="func(props.onCancel)" style="color:var(--ion-color-dark)">
+        <ion-icon icon="close"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-item>
+</ion-toolbar>

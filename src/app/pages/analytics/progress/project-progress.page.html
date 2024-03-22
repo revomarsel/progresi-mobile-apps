@@ -1,0 +1,38 @@
+<HeaderGlobal [props]="props" (event)="eventHandler($event)"></HeaderGlobal>
+<Tabs *ngIf="props.tabs.enable" [props]="props.tabs" (event)="eventHandler($event)"></Tabs>
+
+<ion-content padding>
+  <ion-refresher slot="fixed" 
+  (ionRefresh)="ionRefresh($event)" 
+  (ionPull)="app.ionPull($event)" 
+  (ionStart)="app.ionStart($event)">
+    <ion-refresher-content
+      pullingIcon="arrow-dropdown"
+      pullingText="Pull to refresh"
+      refreshingSpinner="circles"
+      refreshingText="Refreshing...">
+    </ion-refresher-content>
+  </ion-refresher>
+  <Charts [role]="app.auth.user.UserRoles[0].id" [chartProps]="chartProps" [data]="props.tabs.current === 'scurve' ? data.scurve : data.worker" [type]="props.tabs.current === 'scurve' ? 'area' : 'columnCompare'"></Charts>
+  <ion-button size="medium" expand="block" color="primary" (click)="showSummaryStatusProyek()" style="padding: 0 10px 0 10px;" [hidden]="props.tabs.current !== 'scurve'">
+    <ion-icon name="calendar-outline"></ion-icon>
+    &nbsp;Summary Status Proyek
+  </ion-button>
+</ion-content>
+
+<ion-footer>
+  <ion-toolbar mode="md">
+    <!-- *ngIf="props.tabs.enable" -->
+    <ion-segment mode="md" scrollable value="daily">
+      <ion-segment-button mode="md" value="daily" layout="icon-top" [ngClass]="tab_time === 'daily' ? 'highlight':''" (click)="changeTime('daily')">
+        <ion-label>Daily</ion-label>
+      </ion-segment-button>
+      <ion-segment-button mode="md" value="weekly" layout="icon-top" [ngClass]="tab_time === 'weekly' ? 'highlight':''" (click)="changeTime('weekly')">
+        <ion-label>Weekly</ion-label>
+      </ion-segment-button>
+      <ion-segment-button mode="md" value="monthly" layout="icon-top" [ngClass]="tab_time === 'monthly' ? 'highlight':''" (click)="changeTime('monthly')">
+        <ion-label>Monthly</ion-label>
+      </ion-segment-button>
+    </ion-segment>
+  </ion-toolbar>
+</ion-footer>

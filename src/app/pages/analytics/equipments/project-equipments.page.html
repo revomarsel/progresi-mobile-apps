@@ -1,0 +1,142 @@
+<HeaderGlobal [props]="props" (event)="eventHandler($event)"></HeaderGlobal>
+<Tabs
+  *ngIf="props.tabs.enable"
+  [props]="props.tabs"
+  (event)="eventHandler($event)"
+></Tabs>
+
+<ion-content padding>
+  <ion-refresher
+    slot="fixed"
+    (ionRefresh)="ionRefresh($event)"
+    (ionPull)="app.ionPull($event)"
+    (ionStart)="app.ionStart($event)"
+  >
+    <ion-refresher-content
+      pullingIcon="arrow-dropdown"
+      pullingText="Pull to refresh"
+      refreshingSpinner="circles"
+      refreshingText="Refreshing..."
+    >
+    </ion-refresher-content>
+  </ion-refresher>
+  <div class="center-item">
+    <ion-spinner
+      [hidden]="isDataEmpty || (data_paging[props.tabs.current] && data_paging[props.tabs.current].length > 0)"
+      name="dots"
+    ></ion-spinner>
+    <div
+      *ngIf="isDataEmpty && (data_paging[props.tabs.current] && data_paging[props.tabs.current].length < 1)"
+    >
+      -- NO DATA --
+    </div>
+  </div>
+  <ion-card
+    *ngFor="let item of data_paging[props.tabs.current]"
+    class="global-text-regular"
+    (click)="expandData(item.key)"
+  >
+    <ion-grid>
+      <ion-row class="global-text-regular text-primary">
+        <ion-col size="10">
+          <strong>{{item.key}}</strong> - {{ item.items[0].type == 1 ? 'Handy
+          Tools' : item.items[0].type == 2 ? 'Heavy Equipment':
+          item.items[0].type == 3 ? 'Safety Tools' : item.items[0].type == 4 ?
+          'Power Tools' : '' }}
+        </ion-col>
+        <ion-col size="2" style="text-align: right">
+          <ion-icon
+            [name]="item.expanded ? 'chevron-up-outline' : 'chevron-down-outline'"
+          ></ion-icon>
+        </ion-col>
+      </ion-row>
+      <Accordion
+        [expandHeight]="item.items.length * 100"
+        [expanded]="item.expanded"
+      >
+        <ion-item *ngFor="let content of item.items">
+          <div class="flex flex-col w-full item-list-padding">
+            <div class="flex flex-row w-full">
+              <div style="width: 10%" class="self-center">
+                <ion-icon
+                  name="list"
+                  size="small"
+                  style="color: var(--ion-color-primary)"
+                ></ion-icon>
+              </div>
+              <div class="flex flex-col">
+                <b
+                  >{{content.parent_task ? content.parent_task :
+                  content.name}}</b
+                >
+                <span
+                  class="global-text-little-detail text085"
+                  *ngIf="!content_parent_task"
+                  style="padding: 0.2rem 0 0 0"
+                >
+                  {{content.name}}
+                </span>
+              </div>
+            </div>
+            <div
+              class="flex flex-row w-full justify-between"
+              style="padding: 0.75rem 0 0.75rem 0"
+            >
+              <div style="width: 10%"></div>
+              <div class="flex flex-row justify-between w-full">
+                <div class="flex flex-col w-half text-left">
+                  <div
+                    class="global-text-regular text-primary font-bold"
+                    style="margin-top: 0.2rem"
+                  >
+                    {{(content.arrived_qty > 0 ? content.date :
+                    content.planned_arrival) | date:'dd MMM yyyy'}}
+                  </div>
+                  <div class="global-text-little-detail">
+                    {{content.arrived_qty > 0 ? 'Tgl. Mob' : 'Tgl. Rencana'}}
+                  </div>
+                  <div
+                    [ngStyle]="content.arrived_qty > 0 && alpro.getDateDiffDays(content.planned_arrival, content.date)>=0 ? {'color':'green'} : {'color':'red'}"
+                    class="text1 font-bold py-2"
+                  >
+                    {{content.arrived_qty > 0 ?
+                    (alpro.getDateDiffDays(content.planned_arrival,
+                    content.date) === 0 ? 'On-Time' :
+                    alpro.getDateDiffDays(content.planned_arrival, content.date)
+                    !== 0 && alpro.getDateDiffDays(content.planned_arrival,
+                    content.date)+' hari') : 'Belum Diterima'}}
+                  </div>
+                </div>
+                <div
+                  class="w-half flex justify-end"
+                  style="
+                    background: var(--ion-color-secondary);
+                    padding: 0 0.5rem 0 0;
+                    border-radius: 10px;
+                  "
+                >
+                  <div class="flex flex-col text-right self-center">
+                    <div class="text-white">
+                      {{content.arrived_qty > 0 ? content.arrived_qty : ' - '}}
+                       / {{content.planned_qty}} {{content.unit}}
+                    </div>
+                    <div class="global-text-little-detail text-tertiary">
+                      Jumlah {{props.tabs.current === 'in' ? 'Mob' : 'Demob'}}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </ion-item>
+      </Accordion>
+    </ion-grid>
+  </ion-card>
+  <ion-infinite-scroll threshold="100px" (ionInfinite)="loadData($event)">
+    <ion-infinite-scroll-content
+      loadingSpinner="bubbles"
+      loadingText="Loading more data..."
+    >
+    </ion-infinite-scroll-content>
+  </ion-infinite-scroll>
+</ion-content>

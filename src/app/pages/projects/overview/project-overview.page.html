@@ -1,0 +1,136 @@
+<HeaderGlobal [props]="props" (event)="eventHandler($event)"></HeaderGlobal>
+
+<ion-content>
+  <ion-refresher slot="fixed" (ionRefresh)="ionRefresh($event)" (ionPull)="app.ionPull($event)"
+    (ionStart)="app.ionStart($event)">
+    <ion-refresher-content pullingIcon="arrow-dropdown" pullingText="Pull to refresh" refreshingSpinner="circles"
+      refreshingText="Refreshing...">
+    </ion-refresher-content>
+  </ion-refresher>
+  <div *ngIf="data.details">
+    <div style="height:390px;">
+      <div
+        style="background-color: white; height:390px; width:100%;position: absolute; margin:0 auto !important; border-radius: 20px">
+      </div>
+      <div style="height:280px">
+        <div
+          style="background-color: var(--ion-color-medium); height:160px; width:100%;position: absolute; margin:0 auto !important">
+        </div>
+        <div
+          style="background-color: var(--ion-color-dark); height:150px; width:100%;position: absolute; margin:0 auto !important">
+        </div>
+        <ion-card [hidden]="data.details.img_url ? false : true" class="hover-card"
+          style="height: 225px; margin: 30px 20px 20px 20px;">
+          <img [src]="data.details.img_url && data.details.img_url!='null' ? app.auth.baseURL+data.details.img_url : '/assets/img/img-empty.png'" class="content">
+        </ion-card>
+      </div>
+      <div style="height:40px; margin-top: -20px;">
+        <ion-grid>
+          <ion-row style="text-align: center;">
+            <ion-col size=12 class="global-text-title font-bold">{{data.details.name}}</ion-col>
+            <ion-col size=12 class="global-text-little-detail" style="margin: -10px 0 10px 0;">
+              {{data.details.project_type}}</ion-col>
+            <ion-col size=12 class="global-text-little-detail">
+              {{data.details.start_date | date:'dd MMM yyyy'}} - {{data.details.end_date | date:'dd MMM yyyy'}}
+            </ion-col>
+            <ion-col>
+              <ProgressBar [value]="progress"></ProgressBar>
+            </ion-col>
+          </ion-row>
+        </ion-grid>
+      </div>
+    </div>
+  </div>
+  <div *ngFor="let menu of menus; let i = index">
+    <ion-item class="bg-white" style="border-radius: 20px;" (click)="menu.onClick()">
+      <div class="flex flex-col w-full" style="padding: 0.75rem 0.5rem 0.75rem 0;">
+        <div class="flex flex-row w-full justify-between global-text-regular">
+          <div class="flex flex-row flex-start">
+            <ion-icon [name]="menu.icon" color="primary"></ion-icon>
+            <strong style="padding-left: 0.2rem;">{{menu.title}}</strong>
+          </div>
+          <div>
+            <ion-icon [name]="menu.isNav ? 'chevron-forward-outline' : menu.expanded ? 'chevron-up-outline' : 'chevron-down-outline'"></ion-icon>
+          </div>
+        </div>
+        <Accordion expandHeight="300px" [expanded]="menu.expanded">
+          <div *ngIf="menu.title === 'Informasi' && data.details">
+            <ion-grid>
+              <ion-row class="global-text-regular">
+                <ion-col size=4>
+                  <ion-icon name="location" size="large"></ion-icon>
+                </ion-col>
+                <ion-col size=8 style="text-align:right">{{data.details.address}}, {{data.details.city}}</ion-col>
+                <ion-col size=4>
+                  <ion-icon name="cash" size="large"></ion-icon>
+                </ion-col>
+                <ion-col size=8 style="text-align:right">{{data.details.total_nominal | currency:"Rp.":true:"1.0"}}
+                </ion-col>
+              </ion-row>
+              <ion-row class="global-text-regular">
+                <ion-col size=4 class="global-text-desc"><b>No. IMB</b></ion-col>
+                <ion-col size=8 style="text-align:right">{{data.details.imb_number}}</ion-col>
+                <ion-col size=4 class="global-text-desc"><b>Luas Tanah</b></ion-col>
+                <ion-col size=8 style="text-align:right">{{data.details.surface_area}} m<sup>2</sup></ion-col>
+                <ion-col size=4 class="global-text-desc"><b>Luas Bangunan</b></ion-col>
+                <ion-col size=8 style="text-align:right">{{data.details.building_area}} m<sup>2</sup></ion-col>
+              </ion-row>
+            </ion-grid>
+          </div>
+          <div *ngIf="menu.title === 'Perencanaan'">
+            <ion-row>
+              <ion-col size=6 *ngFor="let item of navsPlanning">
+                <ion-button expand="full" fill="clear" class="keypad-button" style="color: var(--ion-color-primary);"
+                  (click)="navigatePage(item.url, $event)">
+                  <div class="keypad-button-inner">
+                    <ion-icon slot="icon-only" [name]="item.icon" size=large></ion-icon>
+                    <ion-label style="margin-top: 5px;">{{item.name}}</ion-label>
+                  </div>
+                </ion-button>
+              </ion-col>
+            </ion-row>
+          </div>
+          <div *ngIf="menu.title === 'Laporan Harian'">
+            <ion-row>
+              <ion-col size=6 *ngFor="let item of navsDailyReport">
+                <ion-button expand="full" fill="clear" class="keypad-button" style="color: var(--ion-color-primary);"
+                  (click)="navigatePage(item.url, $event)">
+                  <div class="keypad-button-inner">
+                    <ion-icon slot="icon-only" [name]="item.icon" size=large></ion-icon>
+                    <ion-label style="margin-top: 5px;">{{item.name}}</ion-label>
+                  </div>
+                </ion-button>
+              </ion-col>
+            </ion-row>
+          </div>
+          <div *ngIf="menu.title === 'Analisa'">
+            <ion-row>
+              <ion-col size=6 *ngFor="let item of navs">
+                <ion-button expand="full" fill="clear" class="keypad-button" style="color: var(--ion-color-primary);"
+                  (click)="navigatePage(item.url, $event)">
+                  <div class="keypad-button-inner">
+                    <ion-icon slot="icon-only" [name]="item.icon" size=large></ion-icon>
+                    <ion-label style="margin-top: 5px;">{{item.name}}</ion-label>
+                  </div>
+                </ion-button>
+              </ion-col>
+            </ion-row>
+          </div>
+          <div *ngIf="menu.title === 'Kolaborasi'">
+            <ion-row>
+              <ion-col size=6 *ngFor="let item of navsExtras">
+                <ion-button expand="full" fill="clear" class="keypad-button" style="color: var(--ion-color-primary);"
+                  (click)="navigatePage(item.url, $event)">
+                  <div class="keypad-button-inner">
+                    <ion-icon slot="icon-only" [name]="item.icon" size=large></ion-icon>
+                    <ion-label style="margin-top: 5px;">{{item.name}}</ion-label>
+                  </div>
+                </ion-button>
+              </ion-col>
+            </ion-row>
+          </div>
+        </Accordion>
+      </div>
+    </ion-item>
+  </div>
+</ion-content>

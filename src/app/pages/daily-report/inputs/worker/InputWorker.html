@@ -1,0 +1,241 @@
+<HeaderGlobal [props]="props" (event)="eventHandler($event)"></HeaderGlobal>
+
+<ion-content>
+    <div *ngIf="!expandNavigator" style="
+        height: 60%;
+        overflow-y: scroll;
+        position: relative;
+    ">
+        <div style="
+            position:absolute; 
+            background-color: white;
+            width: 100%;
+        ">
+            <div style="padding: 30px;" *ngIf="data && data.length > 0">
+                <div style="max-width: 85vw;">
+                    <span class="textcolor-dark">
+                        <strong>Tipe Pekerja</strong>
+                        <span style="color:red">&nbsp;*</span>
+                    </span>
+                    <ion-item style="margin-bottom: 20px;" class="ion-no-padding">
+                        <ionic-selectable [(ngModel)]="selectedItem" [items]="itemsList"
+                            [disabled]="data[selectedItemIdx].readonly" itemValueField="worker_type_id"
+                            itemTextField="name" [canSearch]="true" (onChange)="changeItem($event); calculateTotals();"
+                            placeholder="Tipe Pekerja">
+                            <ng-template ionicSelectableTitleTemplate>Daftar Tipe Pekerja</ng-template>
+                            <ng-template ionicSelectableItemTemplate let-item="item">
+                                <p class="text-ellipsis">
+                                    {{item.name}}
+                                    <br>
+                                    -------
+                                    <br>
+                                    {{item.price ? item.price : 0 | currency:"Rp.":true:"1.0"}} / day
+                                    <br>
+                                    {{item.price_hour ? item.price_hour : 0 | currency:"Rp.":true:"1.0"}} / hour
+                                </p>
+                            </ng-template>
+                        </ionic-selectable>
+                    </ion-item>
+                    <p ion-text color="danger" class="text08"
+                        *ngIf="errorMsg[selectedItemIdx] && errorMsg[selectedItemIdx].worker_type_id">
+                        <ion-text color="danger">
+                            Jenis pekerja tidak boleh kosong
+                        </ion-text>
+                    </p>
+                </div>
+                <div style="margin-bottom: 20px">
+                    <span class="textcolor-dark">
+                        <strong>Qty</strong>
+                        <span *ngIf="true" style="color:red">&nbsp;*</span>
+                    </span>
+                    <ion-item style="margin-bottom: 10px;" class="ion-no-padding">
+                        <ion-input type="number" [(ngModel)]="data[selectedItemIdx].qty" [disabled]="isViewMode"
+                            (ionChange)="calculateTotals()" class="global-text-title"></ion-input>
+                        {{data[selectedItemIdx].equipment_unit}}
+                    </ion-item>
+                    <p ion-text color="danger" class="text08"
+                        *ngIf="errorMsg[selectedItemIdx] && errorMsg[selectedItemIdx].qty">
+                        <ion-text color="danger">
+                            {{errorMsg[selectedItemIdx].qty}}
+                        </ion-text>
+                    </p>
+                </div>
+                <div style="
+                    margin-bottom: 20px;
+                    display: flex;
+                    flex-direction: row;
+                ">
+                    <div style="margin-right: 10px">
+                        <span class="textcolor-dark">
+                            <strong>Jumlah Hari</strong>
+                            <span *ngIf="true" style="color:red">&nbsp;*</span>
+                        </span>
+                        <ion-item style="margin-bottom: 10px;" class="ion-no-padding">
+                            <ion-input type="number" [(ngModel)]="data[selectedItemIdx].day_multiplier"
+                                (ionChange)="calculateTotals()" [disabled]="isViewMode" class="global-text-title">
+                            </ion-input>
+                        </ion-item>
+                        <p ion-text color="danger" class="text08"
+                            *ngIf="errorMsg[selectedItemIdx] && errorMsg[selectedItemIdx].day_multiplier">
+                            <ion-text color="danger">
+                                Multiplier hari tidak boleh kurang dari 0
+                            </ion-text>
+                        </p>
+                    </div>
+                    <div>
+                        <span class="textcolor-dark">
+                            <strong>Jumlah Jam</strong>
+                            <span *ngIf="true" style="color:red">&nbsp;*</span>
+                        </span>
+                        <ion-item style="margin-bottom: 10px;" class="ion-no-padding">
+                            <ion-input type="number" [(ngModel)]="data[selectedItemIdx].hour_multiplier"
+                                (ionChange)="calculateTotals()" [disabled]="isViewMode" class="global-text-title">
+                            </ion-input>
+                            {{data[selectedItemIdx].equipment_unit}}
+                        </ion-item>
+                        <p ion-text color="danger" class="text08"
+                            *ngIf="errorMsg[selectedItemIdx] && errorMsg[selectedItemIdx].hour_multiplier">
+                            <ion-text color="danger">
+                                Multiplier jam tidak boleh kurang dari 0
+                            </ion-text>
+                        </p>
+                    </div>
+                </div>
+                <div class="flex flex-col form-spacer" style="margin-right: 10px">
+                    <div class="flex flex-row w-full" style="margin-bottom: 10px; justify-content: space-between;">
+                        <strong class="center-self" style="width: 75%;">
+                            Harga / hari
+                        </strong>
+                        <div class="prefix-box bg-dark text-tertiary">
+                            <b class="self-center">Rp.</b>
+                        </div>
+                        <ion-item class="ion-no-padding">
+                            <ion-input type="number" [(ngModel)]="data[selectedItemIdx].price" [disabled]="isViewMode"
+                                class="global-text-title text-right" style="margin-left:0.25rem"></ion-input>
+                        </ion-item>
+                    </div>
+                    <div class="flex flex-row w-full" style="margin-bottom: 10px; justify-content: space-between;">
+                        <strong class="center-self" style="width: 75%;">
+                            Harga / jam
+                        </strong>
+                        <div class="prefix-box bg-dark text-tertiary">
+                            <b class="self-center">Rp.</b>
+                        </div>
+                        <ion-item class="ion-no-padding">
+                            <ion-input type="number" [(ngModel)]="data[selectedItemIdx].price_hour"
+                                [disabled]="isViewMode" class="global-text-title text-right"
+                                style="margin-left:0.25rem"></ion-input>
+                        </ion-item>
+                    </div>
+                    <div class="flex flex-row global-text-title"
+                        style="margin-bottom: 10px; justify-content: space-between;">
+                        <strong>Biaya Pekerja</strong>
+                        <div style="align-self:center;">
+                            <strong>{{
+                                (
+                                (data[selectedItemIdx].price * data[selectedItemIdx].day_multiplier) +
+                                (data[selectedItemIdx].price_hour * data[selectedItemIdx].hour_multiplier)
+                                )
+                                * data[selectedItemIdx].qty | currency:"Rp.":true:"1.0"
+                                }}</strong>
+                        </div>
+                    </div>
+                </div>
+                <div style="margin-right: 10px">
+                    <span class="textcolor-dark">
+                        <strong>Description</strong>
+                    </span>
+                    <p>{{data[selectedItemIdx].descr}}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="input-item-navigator">
+        <div style="width:85%">
+            <p style="color:white">Jumlah Pekerja {{day}}</p>
+        </div>
+        <div class="flex flex-row" style="width:15%; justify-content: space-between;">
+            <ion-icon name="search-sharp" [ngStyle]="
+                {
+                    'color': showQuickNav ? 'var(--ion-color-tertiary)' : 'white',
+                    'zoom' : 1.25
+                }" (click)="showQuickNav = !showQuickNav">
+            </ion-icon>
+            <ion-icon [name]="!expandNavigator ? 'chevron-up-sharp' : 'chevron-down-sharp'"
+                style="color:var(--ion-color-tertiary); zoom:1.25" (click)="expandNavigator = !expandNavigator">
+            </ion-icon>
+        </div>
+    </div>
+    <div *ngIf="data && data.length > 0" [ngStyle]="
+        {
+            'height': !expandNavigator ? '35%' : '95%',
+            'position': 'relative',
+            'overflow-y': 'scroll'
+        }
+    ">
+        <div style="
+            position: absolute;
+            width: 100%;
+        ">
+            <ion-toolbar mode="md" color="dark" style="padding: 0 1rem 0 1rem;" *ngIf="showQuickNav">
+                <ionic-selectable #quickNavSelection [items]="data" itemValueField="worker_type_id" itemTextField="name"
+                    [canSearch]="true" (onChange)="quickNavigation($event)" placeholder="*Click Untuk Tampilkan Semua Task">
+                    <ng-template ionicSelectableTitleTemplate>Daftar Tipe Pekerja</ng-template>
+                    <ng-template ionicSelectableItemTemplate let-item="item">
+                        <p class="text-ellipsis">
+                            {{item.name}}
+                            <br>
+                            -------
+                            <br>
+                            <strong>{{
+                                (
+                                (data[selectedItemIdx].price * data[selectedItemIdx].day_multiplier) +
+                                (data[selectedItemIdx].price_hour * data[selectedItemIdx].hour_multiplier)
+                                )
+                                * data[selectedItemIdx].qty | currency:"Rp.":true:"1.0"
+                                }}</strong>
+                        </p>
+                    </ng-template>
+                </ionic-selectable>
+            </ion-toolbar>
+            <ion-item *ngFor="let item of data; let idx = index" [ngStyle]="
+                {
+                    'padding': '5px 0px 0px 0px',
+                    'min-height' : '50px',
+                    'background-color': selectedItemIdx === idx ? 'var(--ion-color-tertiary)' : 
+                    !data[idx].qty || !data[idx].day_multiplier || !data[idx].hour_multiplier ? 'grey' : ''
+                }
+                " (click)="changeSelectedItem(idx)">
+                <div style="width: 95%; display: flex; flex-direction: row;">
+                    <div style="width: 5%; align-self: center;">
+                        {{idx + 1}}.
+                    </div>
+                    <div style="display: flex; flex-direction: column; width: 90%">
+                        <b>{{item.name ? item.name : '-'}}</b>
+                    </div>
+                </div>
+                <div style="width: 5%;">
+                    <ion-icon *ngIf="!item.readonly" name="close" style="color:maroon; zoom: 1.1"
+                        (click)="deleteData(idx, item.id)"></ion-icon>
+                </div>
+            </ion-item>
+        </div>
+    </div>
+</ion-content>
+
+<ion-footer class="ion-padding" style="background-color:var(--ion-color-dark)">
+    <div class="flex flex-col" style="color:white">
+        <div class="flex flex-row" style="justify-content: space-between; margin-bottom: 5px;">
+            <span>Biaya Pekerja</span>
+            <strong style="color:var(--ion-color-tertiary)">
+                {{ totalCost | currency:"Rp.":true:"1.0"}}
+            </strong>
+        </div>
+        <div class="flex flex-row" style="justify-content: space-between; margin-bottom: 5px;">
+            <span>Total Pekerja</span>
+            <strong style="color:var(--ion-color-tertiary)">
+                {{ totalWorker }}
+            </strong>
+        </div>
+    </div>
+</ion-footer>

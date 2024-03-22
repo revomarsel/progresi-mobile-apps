@@ -1,0 +1,306 @@
+<HeaderGlobal [props]="props"></HeaderGlobal>
+<div class="bg-white pb-0">
+  <Stepper [props]="props.stepper"></Stepper>
+</div>
+<ion-content class="bg-white" class="mt-2">
+  <div *ngIf="props.stepper.idActive === 1" class="p-2 mb-5">
+    <div class="flex flex-row mt-0">
+      <div class="flex flex-col w-100">
+        <ion-label position="stacked">Dibuat Oleh</ion-label>
+        <ion-item class="mb-2 ion-no-padding">
+          <ion-input
+            readonly
+            type="text"
+            class="global-text-title"
+            [(ngModel)]="data.created_by"
+          ></ion-input>
+          <ion-icon slot="end" size="small" name="person-outline"></ion-icon>
+        </ion-item>
+      </div>
+    </div>
+    <div class="flex flex-row mt-2">
+      <div class="flex flex-col w-100">
+        <ion-label position="stacked">No Dokumen</ion-label>
+        <ion-item class="mb-2 ion-no-padding">
+          <ion-input
+            [(ngModel)]="data.no"
+            type="text"
+            class="global-text-title"
+          ></ion-input>
+          <ion-icon
+            slot="end"
+            size="small"
+            name="document-text-outline"
+          ></ion-icon>
+        </ion-item>
+      </div>
+    </div>
+    <div class="flex flex-row mt-2">
+      <div class="flex flex-col w-100">
+        <ion-label position="stacked">Judul Dokumen</ion-label>
+        <ion-item class="mb-2 ion-no-padding">
+          <ion-input
+            [(ngModel)]="data.judul"
+            type="text"
+            class="global-text-title"
+          ></ion-input>
+          <ion-icon
+            slot="end"
+            size="small"
+            name="document-text-outline"
+          ></ion-icon>
+        </ion-item>
+      </div>
+    </div>
+    <div class="flex flex-row mt-2">
+      <div class="flex flex-col w-100">
+        <ion-label position="stacked">Due Date</ion-label>
+        <ion-item class="mb-2 ion-no-padding">
+          <ion-datetime
+            [(ngModel)]="data.due_date"
+            displayFormat="DD MMM YYYY"
+            [disabled]="isViewMode"
+          >
+          </ion-datetime>
+          <ion-icon slot="end" size="small" name="calendar-outline"></ion-icon>
+        </ion-item>
+      </div>
+    </div>
+    <div class="flex flex-row mt-2">
+      <div class="flex flex-col w-100">
+        <ion-label position="stacked" class="font-size-16"
+          >Lampirkan Keterangan</ion-label
+        >
+        <ion-item class="mb-2 ion-no-padding">
+          <ion-input
+            [(ngModel)]="data.keterangan"
+            type="text"
+            class="global-text-title"
+            class="font-size-14"
+          ></ion-input>
+          <ion-icon
+            slot="end"
+            size="small"
+            name="document-text-outline"
+          ></ion-icon>
+        </ion-item>
+      </div>
+    </div>
+  </div>
+  <div *ngIf="props.stepper.idActive === 2" class="p-2 mb-5">
+    <div class="flex flex-row mt-0 card">
+      <div class="flex flex-col w-100">
+        <ion-label position="stacked" class="font-size-16"
+          >Pilih Proyek</ion-label
+        >
+        <ion-item class="mb-2">
+          <ionic-selectable
+            class="font-size-14"
+            [(ngModel)]="data.proyek"
+            [items]="filter.list"
+            [itemValueField]="filter.value"
+            [itemTextField]="filter.text"
+            [canSearch]="filter.canSearch"
+            (onChange)="func(selectProyek($event))"
+          >
+          </ionic-selectable>
+          <ion-icon
+            slot="end"
+            size="small"
+            name="document-text-outline"
+          ></ion-icon>
+        </ion-item>
+        <p class="taskDescription font-size-11 my-0">
+          <ion-icon name="information-circle-outline"></ion-icon> Pilih Proyek
+          Untuk Menampilkan data Task & User
+        </p>
+      </div>
+    </div>
+    <div *ngIf="data.proyek.id > 0">
+      <div class="flex flex-row mt-2 card">
+        <div class="flex flex-col w-100">
+          <ion-label position="stacked" class="font-size-16"
+            >Task Terkait</ion-label
+          >
+          <ion-item class="mb-2 ion-no-padding">
+            <tag-input
+              [(ngModel)]="data.tasks"
+              [identifyBy]="'value'"
+              [displayBy]="'display'"
+              [onlyFromAutocomplete]="true"
+              class="font-size-14"
+            >
+              <tag-input-dropdown
+                [showDropdownIfEmpty]="true"
+                [autocompleteItems]="itemsList"
+              >
+              </tag-input-dropdown>
+            </tag-input>
+            <ion-icon slot="end" size="small" name="hammer-outline"></ion-icon>
+          </ion-item>
+          <p class="taskDescription font-size-11 my-0">
+            <ion-icon name="information-circle-outline"></ion-icon> Task Bisa
+            Dipilih Lebih Dari Satu
+          </p>
+        </div>
+      </div>
+      <div class="flex flex-row mt-2 card">
+        <div class="flex flex-col w-100">
+          <ion-label position="stacked" class="font-size-16"
+            >Dokument Lalui Proses Review ?</ion-label
+          >
+          <ion-item class="mb-2 ion-no-padding">
+            <ion-select
+              class="font-size-14"
+              interface="action-sheet"
+              value="review"
+            >
+              <ion-select-option value="review"
+                >Ya, Review Sebelum Kirim</ion-select-option
+              >
+              <ion-select-option value="approval"
+                >Langsung Submit ke Approval
+              </ion-select-option>
+            </ion-select>
+            <ion-icon slot="end" size="small" name="hammer-outline"></ion-icon>
+          </ion-item>
+          <p class="taskDescription font-size-11 my-0">
+            <ion-icon name="information-circle-outline"></ion-icon>
+            diijinkan Satu Approval tiap pengajuan Dokumen
+          </p>
+        </div>
+      </div>
+      <div class="flex flex-row mt-2 card">
+        <div class="flex flex-col w-100">
+          <ion-label position="stacked" class="font-size-16"
+            >Pilih User Approval</ion-label
+          >
+          <ion-item class="mb-2">
+            <ionic-selectable
+              class="font-size-14"
+              [(ngModel)]="data.approval"
+              [items]="userApproval.list"
+              [itemValueField]="'value'"
+              [itemTextField]="'display'"
+              [canSearch]="filter.canSearch"
+              (onChange)="func(selectProyek($event))"
+            >
+            </ionic-selectable>
+            <ion-icon
+              slot="end"
+              size="small"
+              name="document-text-outline"
+            ></ion-icon>
+          </ion-item>
+          <p class="taskDescription font-size-11 my-0">
+            <ion-icon name="information-circle-outline"></ion-icon>
+            diijinkan Satu Approval tiap pengajuan Dokumen
+          </p>
+        </div>
+      </div>
+      <div class="flex flex-row mt-2 card">
+        <div class="flex flex-col w-100">
+          <ion-label position="stacked" class="font-size-16"
+            >Pilih User Reviewer</ion-label
+          >
+          <ion-item class="ion-no-padding mb-2">
+            <tag-input
+              [(ngModel)]="data.reviewer"
+              [identifyBy]="'value'"
+              [displayBy]="'display'"
+              [onlyFromAutocomplete]="true"
+              class="font-size-14"
+            >
+              <tag-input-dropdown
+                [showDropdownIfEmpty]="true"
+                [autocompleteItems]="userItemsList"
+              >
+              </tag-input-dropdown>
+            </tag-input>
+            <ion-icon slot="end" size="small" name="person-outline"></ion-icon>
+          </ion-item>
+          <p class="taskDescription font-size-11 my-0">
+            <ion-icon name="information-circle-outline"></ion-icon> User bisa
+            dipilih lebih dari satu
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div *ngIf="props.stepper.idActive === 3" class="p-2 mb-5">
+    <div class="w-100">
+      <label
+        for="upload-file"
+        class="btn btn-outline-upload d-block text-center"
+      >
+        <ion-icon
+          name="document-outline"
+          class="mb-2"
+          style="font-size: 3rem"
+        ></ion-icon>
+        <br />
+        Klik Untuk Lampirkan <br />
+        Dokumen Submittal
+      </label>
+      <input
+        type="file"
+        accept="pdf/*"
+        [(ngModel)]="fileAsli"
+        (change)="handleFileSelect($event)"
+        id="upload-file"
+      />
+      <div *ngIf="fileAsli" class="mt-2">
+        File : {{fileAsli.split("\\").pop()}}
+      </div>
+    </div>
+    <ion-item class="mb-1 mt-2">
+      <ion-label position="stacked">Keterangan File</ion-label>
+      <ion-textarea
+        [(ngModel)]="data.keterangan_file"
+        class="font-size-13"
+        placeholder="Input Disini..."
+      ></ion-textarea>
+    </ion-item>
+  </div>
+  <div id="footer">
+    <div class="w-100 text-center">
+      <ion-item
+        ion-button
+        (click)="nextStep(props.stepper.idActive)"
+        color="success"
+        *ngIf="3 > props.stepper.idActive"
+      >
+        <label slot="end" class="font-size-14"
+          >Step {{props.stepper.idActive + 1}}</label
+        >
+        <label class="font-size-16 pl-2"> Lanjutkan Input</label>
+        <ion-icon
+          name="chevron-forward-outline"
+          class="ml-2 font-size-17"
+        ></ion-icon>
+      </ion-item>
+    </div>
+    <form (ngSubmit)="submit()" *ngIf="props.stepper.idActive === 3">
+      <ion-row>
+        <ion-col>
+          <button
+            ion-button
+            type="submit"
+            class="btn btn-primary w-full font-weight-bold p-2 font-size-14"
+          >
+            <ion-icon name="save-outline"></ion-icon> Simpan
+          </button>
+        </ion-col>
+        <ion-col>
+          <button
+            ion-button
+            (click)="detailDocumentControl(13)"
+            class="btn btn-warning w-full font-weight-bold p-2 font-size-14"
+          >
+            <ion-icon name="document-outline"></ion-icon> Draft
+          </button>
+        </ion-col>
+      </ion-row>
+    </form>
+  </div>
+</ion-content>
